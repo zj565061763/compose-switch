@@ -1,17 +1,12 @@
 package com.sd.lib.compose.swch
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.unit.IntOffset
@@ -27,31 +22,8 @@ fun FSwitch(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true,
-    background: @Composable (progress: Float) -> Unit = {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.4f), RoundedCornerShape(50))
-        ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .alpha(it)
-                    .background(MaterialTheme.colors.primary, RoundedCornerShape(50))
-            )
-        }
-    },
-    thumb: @Composable (progress: Float) -> Unit = {
-        Box(
-            modifier = Modifier
-                .aspectRatio(1f, true)
-                .padding(2.dp)
-                .background(
-                    color = Color.White,
-                    shape = RoundedCornerShape(50),
-                )
-        )
-    },
+    background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
+    thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
 ) {
     var isChecked by remember(checked) { mutableStateOf(checked) }
     val scope = rememberCoroutineScope()
