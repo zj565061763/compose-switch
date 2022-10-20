@@ -18,18 +18,20 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FSwitch(
-    modifier: Modifier = Modifier,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    checked: Boolean = false,
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
+    onCheckedChange: (Boolean) -> Unit,
 ) {
-    var isChecked by remember(checked) { mutableStateOf(checked) }
+    val enabledUpdated by rememberUpdatedState(enabled)
+    val onCheckedChangeUpdated by rememberUpdatedState(onCheckedChange)
+
     val scope = rememberCoroutineScope()
 
-    val onCheckedChangeUpdated by rememberUpdatedState(onCheckedChange)
-    val enabledUpdated by rememberUpdatedState(enabled)
+    var isChecked by remember { mutableStateOf(checked) }
+    LaunchedEffect(checked) { isChecked = checked }
 
     var totalWidth by remember { mutableStateOf(0f) }
     var thumbWidth by remember { mutableStateOf(0f) }
@@ -54,36 +56,52 @@ fun FSwitch(
 
     val progress by remember {
         derivedStateOf {
-            if (checkedOffset > 0f) {
-                (currentOffset / checkedOffset).coerceIn(0f, 1f)
+            if (checkedOffset > uncheckedOffset) {
+                if (currentOffset <= uncheckedOffset) {
+                    0f
+                } else if (currentOffset >= checkedOffset) {
+                    1f
+                } else {
+                    val total = checkedOffset - uncheckedOffset
+                    val current = currentOffset - uncheckedOffset
+                    (current / total).coerceIn(0f, 1f)
+                }
             } else {
                 0f
             }
         }
     }
 
+    fun notifyCallback() {
+        when (currentOffset) {
+            uncheckedOffset -> {
+                if (isChecked) {
+                    isChecked = false
+                    onCheckedChangeUpdated(false)
+                }
+            }
+            checkedOffset -> {
+                if (!isChecked) {
+                    isChecked = true
+                    onCheckedChangeUpdated(true)
+                }
+            }
+        }
+    }
+
     fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
+        if (currentOffset == offset) {
+            notifyCallback()
+            return
+        }
+
         scope.launch {
             animatable.snapTo(currentOffset)
             animatable.animateTo(
                 targetValue = offset,
                 initialVelocity = initialVelocity ?: animatable.velocity,
-            ) { currentOffset = value }
-
-            when (currentOffset) {
-                uncheckedOffset -> {
-                    if (isChecked) {
-                        isChecked = false
-                        onCheckedChangeUpdated(false)
-                    }
-                }
-                checkedOffset -> {
-                    if (!isChecked) {
-                        isChecked = true
-                        onCheckedChangeUpdated(true)
-                    }
-                }
-            }
+            ) { currentOffset = value.coerceIn(uncheckedOffset, checkedOffset) }
+            notifyCallback()
         }
     }
 
@@ -119,8 +137,8 @@ fun FSwitch(
                             val change = it.positionChange()
                             it.consume()
                             hasMove = true
-                            val offset = (currentOffset + change.x).coerceIn(uncheckedOffset, checkedOffset)
-                            currentOffset = offset
+                            val offset = currentOffset + change.x
+                            currentOffset = offset.coerceIn(uncheckedOffset, checkedOffset)
                         }
                     },
                     onUp = {
