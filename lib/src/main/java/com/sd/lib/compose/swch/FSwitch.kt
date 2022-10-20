@@ -42,7 +42,7 @@ fun FSwitch(
     var currentOffset by remember { mutableStateOf(boundsOffset) }
     val animatable = remember { Animatable(boundsOffset) }
 
-    var isTouch by remember { mutableStateOf(false) }
+    var hasMove by remember { mutableStateOf(false) }
 
     val progress by remember {
         derivedStateOf {
@@ -62,35 +62,27 @@ fun FSwitch(
                 targetValue = offset,
                 initialVelocity = initialVelocity ?: animatable.velocity,
             ) { currentOffset = value }
+
+            when (currentOffset) {
+                uncheckedOffset -> {
+                    if (isChecked) {
+                        isChecked = false
+                        onCheckedChangeUpdated(false)
+                    }
+                }
+                checkedOffset -> {
+                    if (!isChecked) {
+                        isChecked = true
+                        onCheckedChangeUpdated(true)
+                    }
+                }
+            }
         }
     }
 
     LaunchedEffect(isReady, isChecked) {
-        if (isReady && !animatable.isRunning && !isTouch) {
+        if (isReady && !animatable.isRunning) {
             currentOffset = boundsOffset
-        }
-    }
-
-    LaunchedEffect(animatable) {
-        var lastState = animatable.isRunning
-        snapshotFlow { animatable.isRunning }.collect { isRunning ->
-            if (lastState && !isRunning && !isTouch) {
-                when (animatable.value) {
-                    uncheckedOffset -> {
-                        if (isChecked) {
-                            isChecked = false
-                            onCheckedChangeUpdated(false)
-                        }
-                    }
-                    checkedOffset -> {
-                        if (!isChecked) {
-                            isChecked = true
-                            onCheckedChangeUpdated(true)
-                        }
-                    }
-                }
-            }
-            lastState = isRunning
         }
     }
 
@@ -113,18 +105,19 @@ fun FSwitch(
                 }.fPointerChange(
                     onStart = {
                         enableVelocity = true
-                        isTouch = true
+                        hasMove = false
                     },
                     onMove = {
                         if (it.id == currentEvent?.changes?.first()?.id) {
                             val change = it.positionChange()
                             it.consume()
+                            hasMove = true
                             val offset = (currentOffset + change.x).coerceIn(uncheckedOffset, checkedOffset)
                             currentOffset = offset
                         }
                     },
                     onUp = {
-                        if (pointerCount == 1) {
+                        if (pointerCount == 1 && hasMove) {
                             val velocity = getPointerVelocity(it.id).x
                             val offset = if (velocity.absoluteValue > 200f) {
                                 if (velocity > 0) checkedOffset else uncheckedOffset
@@ -134,9 +127,6 @@ fun FSwitch(
                             animateToOffset(offset, velocity)
                         }
                     },
-                    onFinish = {
-                        isTouch = false
-                    }
                 )
             } else {
                 this
