@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_switch.ui.theme.AppTheme
-import com.sd.lib.compose.swch.FSwitch
+import com.sd.lib.compose.swich.FSwitch
 import kotlinx.coroutines.delay
 
 private const val TAG = "MainActivity"

@@ -9,7 +9,7 @@ def libArtifactId = "compose-switch"
 def libVersionName = "1.0.0-alpha01"
 
 android {
-    namespace = "com.sd.lib.compose.swch"
+    namespace = "com.sd.lib.compose.swich"
     compileSdk 33
     defaultConfig {
         minSdk 21

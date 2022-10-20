@@ -1,4 +1,4 @@
-package com.sd.lib.compose.swch
+package com.sd.lib.compose.swich
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.*

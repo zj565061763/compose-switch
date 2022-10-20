@@ -1,4 +1,4 @@
-package com.sd.lib.compose.swch
+package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
