@@ -146,6 +146,7 @@ fun FSwitch(
                     onMove = {
                         if (it.id == currentEvent?.changes?.first()?.id) {
                             val change = it.positionChange()
+                            it.consume()
                             val offset = (currentOffset + change.x).coerceIn(uncheckedOffset, checkedOffset)
                             currentOffset = offset
                         }
