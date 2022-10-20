@@ -57,14 +57,14 @@ fun FSwitch(
     val progress by remember {
         derivedStateOf {
             if (checkedOffset > uncheckedOffset) {
-                if (currentOffset <= uncheckedOffset) {
-                    0f
-                } else if (currentOffset >= checkedOffset) {
-                    1f
-                } else {
-                    val total = checkedOffset - uncheckedOffset
-                    val current = currentOffset - uncheckedOffset
-                    (current / total).coerceIn(0f, 1f)
+                when {
+                    currentOffset <= uncheckedOffset -> 0f
+                    currentOffset >= checkedOffset -> 1f
+                    else -> {
+                        val total = checkedOffset - uncheckedOffset
+                        val current = currentOffset - uncheckedOffset
+                        (current / total).coerceIn(0f, 1f)
+                    }
                 }
             } else {
                 0f
