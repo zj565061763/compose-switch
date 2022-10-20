@@ -151,7 +151,7 @@ fun FSwitch(
                             } else {
                                 if (maxPointerCount == 1
                                     && !it.isConsumed
-                                    && (it.uptimeMillis - it.previousUptimeMillis) < 180
+                                    && (it.uptimeMillis - it.previousUptimeMillis) < 200
                                 ) {
                                     it.consume()
                                     handleClick()
