@@ -36,11 +36,19 @@ fun FSwitch(
     val isReady by remember { derivedStateOf { totalWidth > 0 && thumbWidth > 0 } }
 
     val uncheckedOffset by remember { mutableStateOf(0f) }
-    val checkedOffset by remember { derivedStateOf { (totalWidth - thumbWidth).coerceAtLeast(0f) } }
-    val boundsOffset by remember { derivedStateOf { if (isChecked) checkedOffset else uncheckedOffset } }
+    val checkedOffset by remember {
+        derivedStateOf {
+            val delta = (totalWidth - thumbWidth).coerceAtLeast(0f)
+            uncheckedOffset + delta
+        }
+    }
 
-    var currentOffset by remember { mutableStateOf(boundsOffset) }
-    val animatable = remember { Animatable(boundsOffset) }
+    fun boundsOffset(): Float {
+        return if (isChecked) checkedOffset else uncheckedOffset
+    }
+
+    var currentOffset by remember { mutableStateOf(boundsOffset()) }
+    val animatable = remember { Animatable(boundsOffset()) }
 
     var hasMove by remember { mutableStateOf(false) }
 
@@ -55,7 +63,6 @@ fun FSwitch(
     }
 
     fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
-        if (currentOffset == offset) return
         scope.launch {
             animatable.snapTo(currentOffset)
             animatable.animateTo(
@@ -80,9 +87,9 @@ fun FSwitch(
         }
     }
 
-    LaunchedEffect(isReady, isChecked) {
+    LaunchedEffect(isReady, isChecked, uncheckedOffset, checkedOffset) {
         if (isReady && !animatable.isRunning) {
-            currentOffset = boundsOffset
+            currentOffset = boundsOffset()
         }
     }
 
