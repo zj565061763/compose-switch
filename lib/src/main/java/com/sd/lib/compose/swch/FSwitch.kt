@@ -43,12 +43,12 @@ fun FSwitch(
         }
     }
 
-    fun boundsOffset(): Float {
+    fun boundsOffset(isChecked: Boolean): Float {
         return if (isChecked) checkedOffset else uncheckedOffset
     }
 
-    var currentOffset by remember { mutableStateOf(boundsOffset()) }
-    val animatable = remember { Animatable(boundsOffset()) }
+    var currentOffset by remember { mutableStateOf(boundsOffset(isChecked)) }
+    val animatable = remember { Animatable(boundsOffset(isChecked)) }
 
     var hasMove by remember { mutableStateOf(false) }
 
@@ -89,7 +89,7 @@ fun FSwitch(
 
     LaunchedEffect(isReady, isChecked, uncheckedOffset, checkedOffset) {
         if (isReady && !animatable.isRunning) {
-            currentOffset = boundsOffset()
+            currentOffset = boundsOffset(isChecked)
         }
     }
 
@@ -106,7 +106,7 @@ fun FSwitch(
                     indication = null,
                 ) {
                     if (!animatable.isRunning) {
-                        val offset = if (isChecked) uncheckedOffset else checkedOffset
+                        val offset = boundsOffset(!isChecked)
                         animateToOffset(offset)
                     }
                 }.fPointerChange(
