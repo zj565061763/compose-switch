@@ -1,8 +1,6 @@
 package com.sd.lib.compose.swch
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -105,6 +103,13 @@ fun FSwitch(
         }
     }
 
+    fun handleClick() {
+        if (!animatable.isRunning) {
+            val offset = boundsOffset(!isChecked)
+            animateToOffset(offset)
+        }
+    }
+
     LaunchedEffect(isReady, isChecked, uncheckedOffset, checkedOffset) {
         if (isReady && !animatable.isRunning) {
             currentOffset = boundsOffset(isChecked)
@@ -119,15 +124,7 @@ fun FSwitch(
         }
         .run {
             if (isReady && enabledUpdated) {
-                clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ) {
-                    if (!animatable.isRunning) {
-                        val offset = boundsOffset(!isChecked)
-                        animateToOffset(offset)
-                    }
-                }.fPointerChange(
+                fPointerChange(
                     onStart = {
                         enableVelocity = true
                         hasMove = false
@@ -142,14 +139,24 @@ fun FSwitch(
                         }
                     },
                     onUp = {
-                        if (pointerCount == 1 && hasMove) {
-                            val velocity = getPointerVelocity(it.id).x
-                            val offset = if (velocity.absoluteValue > 200f) {
-                                if (velocity > 0) checkedOffset else uncheckedOffset
+                        if (pointerCount == 1) {
+                            if (hasMove) {
+                                val velocity = getPointerVelocity(it.id).x
+                                val offset = if (velocity.absoluteValue > 200f) {
+                                    if (velocity > 0) checkedOffset else uncheckedOffset
+                                } else {
+                                    boundsValue(currentOffset, uncheckedOffset, checkedOffset)
+                                }
+                                animateToOffset(offset, velocity)
                             } else {
-                                boundsValue(currentOffset, uncheckedOffset, checkedOffset)
+                                if (maxPointerCount == 1
+                                    && !it.isConsumed
+                                    && (it.uptimeMillis - it.previousUptimeMillis) < 180
+                                ) {
+                                    it.consume()
+                                    handleClick()
+                                }
                             }
-                            animateToOffset(offset, velocity)
                         }
                     },
                 )
