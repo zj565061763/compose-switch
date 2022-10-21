@@ -44,7 +44,7 @@ fun Content() {
     var isChecked by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
-        delay(3000)
+        delay(2000)
         isChecked = false
     }
 
