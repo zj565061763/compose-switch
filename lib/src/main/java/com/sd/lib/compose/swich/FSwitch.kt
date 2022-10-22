@@ -23,19 +23,14 @@ fun FSwitch(
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    val state = remember { FSwitchState(checked) }.apply {
-        this.onCheckedChange = onCheckedChange
+    val state = remember { FSwitchState(checked) }.also {
+        it.onCheckedChange = onCheckedChange
+        it.handleComposable(checked)
     }
 
     val enabledUpdated by rememberUpdatedState(enabled)
     val coroutineScope = rememberCoroutineScope()
     var hasMove by remember { mutableStateOf(false) }
-
-    LaunchedEffect(checked) {
-        state.isChecked = checked
-    }
-
-    state.handleComposable()
 
     Box(modifier = modifier
         .width(50.dp)
@@ -131,7 +126,11 @@ private class FSwitchState(
     private val animatable = Animatable(boundsOffset(isChecked))
 
     @Composable
-    fun handleComposable() {
+    fun handleComposable(checked: Boolean) {
+        LaunchedEffect(checked) {
+            isChecked = checked
+        }
+
         LaunchedEffect(
             isReady,
             isChecked,
