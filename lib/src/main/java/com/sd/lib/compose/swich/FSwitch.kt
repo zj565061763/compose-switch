@@ -23,107 +23,28 @@ fun FSwitch(
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val state = remember { FSwitchState(checked) }.apply {
+        this.onCheckedChange = onCheckedChange
+    }
+
     val enabledUpdated by rememberUpdatedState(enabled)
-    val onCheckedChangeUpdated by rememberUpdatedState(onCheckedChange)
-
-    val scope = rememberCoroutineScope()
-
-    var isChecked by remember { mutableStateOf(checked) }
-    LaunchedEffect(checked) { isChecked = checked }
-
-    var totalWidth by remember { mutableStateOf(0f) }
-    var thumbWidth by remember { mutableStateOf(0f) }
-    val isReady by remember { derivedStateOf { totalWidth > 0 && thumbWidth > 0 } }
-
-    val uncheckedOffset by remember { mutableStateOf(0f) }
-    val checkedOffset by remember {
-        derivedStateOf {
-            val delta = (totalWidth - thumbWidth).coerceAtLeast(0f)
-            uncheckedOffset + delta
-        }
-    }
-
-    fun boundsOffset(isChecked: Boolean): Float {
-        return if (isChecked) checkedOffset else uncheckedOffset
-    }
-
-    var currentOffset by remember { mutableStateOf(boundsOffset(isChecked)) }
-    val animatable = remember { Animatable(boundsOffset(isChecked)) }
-
+    val coroutineScope = rememberCoroutineScope()
     var hasMove by remember { mutableStateOf(false) }
 
-    val progress by remember {
-        derivedStateOf {
-            if (checkedOffset > uncheckedOffset) {
-                when {
-                    currentOffset <= uncheckedOffset -> 0f
-                    currentOffset >= checkedOffset -> 1f
-                    else -> {
-                        val total = checkedOffset - uncheckedOffset
-                        val current = currentOffset - uncheckedOffset
-                        (current / total).coerceIn(0f, 1f)
-                    }
-                }
-            } else {
-                0f
-            }
-        }
+    LaunchedEffect(checked) {
+        state.isChecked = checked
     }
 
-    fun notifyCallback() {
-        when (currentOffset) {
-            uncheckedOffset -> {
-                if (isChecked) {
-                    isChecked = false
-                    onCheckedChangeUpdated(false)
-                }
-            }
-            checkedOffset -> {
-                if (!isChecked) {
-                    isChecked = true
-                    onCheckedChangeUpdated(true)
-                }
-            }
-        }
-    }
-
-    fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
-        if (currentOffset == offset) {
-            notifyCallback()
-            return
-        }
-
-        scope.launch {
-            animatable.snapTo(currentOffset)
-            animatable.animateTo(
-                targetValue = offset,
-                initialVelocity = initialVelocity ?: animatable.velocity,
-            ) { currentOffset = value.coerceIn(uncheckedOffset, checkedOffset) }
-            notifyCallback()
-        }
-    }
-
-    fun handleClick() {
-        if (!animatable.isRunning) {
-            val offset = boundsOffset(!isChecked)
-            animateToOffset(offset)
-        }
-    }
-
-    LaunchedEffect(isReady, isChecked, uncheckedOffset, checkedOffset) {
-        if (isReady && !animatable.isRunning) {
-            currentOffset = boundsOffset(isChecked)
-        }
-    }
+    state.handleComposable()
 
     Box(modifier = modifier
         .width(50.dp)
         .height(25.dp)
         .onPlaced {
-            totalWidth = it.size.width.toFloat()
+            state.boxSize = it.size.width.toFloat()
         }
         .run {
-            if (isReady && enabledUpdated) {
+            if (state.isReady && enabledUpdated) {
                 fPointerChange(
                     onStart = {
                         enableVelocity = true
@@ -134,27 +55,17 @@ fun FSwitch(
                             val change = it.positionChange()
                             it.consume()
                             hasMove = true
-                            val offset = currentOffset + change.x
-                            currentOffset = offset.coerceIn(uncheckedOffset, checkedOffset)
+                            state.handleMove(change.x)
                         }
                     },
                     onUp = {
-                        if (pointerCount == 1) {
+                        if (pointerCount == 1 && !it.isConsumed) {
                             if (hasMove) {
                                 val velocity = getPointerVelocity(it.id).x
-                                val offset = if (velocity.absoluteValue > 200f) {
-                                    if (velocity > 0) checkedOffset else uncheckedOffset
-                                } else {
-                                    boundsValue(currentOffset, uncheckedOffset, checkedOffset)
-                                }
-                                animateToOffset(offset, velocity)
+                                coroutineScope.launch { state.handleFling(velocity) }
                             } else {
-                                if (maxPointerCount == 1
-                                    && !it.isConsumed
-                                    && (it.uptimeMillis - it.previousUptimeMillis) < 200
-                                ) {
-                                    it.consume()
-                                    handleClick()
+                                if (maxPointerCount == 1 && (it.uptimeMillis - it.previousUptimeMillis) < 200) {
+                                    coroutineScope.launch { state.handleClick() }
                                 }
                             }
                         }
@@ -165,19 +76,130 @@ fun FSwitch(
             }
         }
     ) {
-        background(progress)
+        background(state.progress)
         Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .onPlaced {
-                    thumbWidth = it.size.width.toFloat()
+                    state.thumbSize = it.size.width.toFloat()
                 }
                 .offset {
-                    IntOffset(currentOffset.roundToInt(), 0)
+                    IntOffset(state.currentOffset.roundToInt(), 0)
                 },
             contentAlignment = Alignment.Center,
         ) {
-            thumb(progress)
+            thumb(state.progress)
+        }
+    }
+}
+
+private class FSwitchState(
+    checked: Boolean
+) {
+    var isChecked: Boolean by mutableStateOf(checked)
+    var onCheckedChange: ((Boolean) -> Unit)? = null
+
+    var boxSize: Float by mutableStateOf(0f)
+    var thumbSize: Float by mutableStateOf(0f)
+    val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
+
+    val uncheckedOffset: Float by mutableStateOf(0f)
+    val checkedOffset: Float by derivedStateOf {
+        val delta = (boxSize - thumbSize).coerceAtLeast(0f)
+        uncheckedOffset + delta
+    }
+
+    var currentOffset: Float by mutableStateOf(boundsOffset(isChecked))
+        private set
+
+    val progress: Float by derivedStateOf {
+        if (checkedOffset > uncheckedOffset) {
+            when {
+                currentOffset <= uncheckedOffset -> 0f
+                currentOffset >= checkedOffset -> 1f
+                else -> {
+                    val total = checkedOffset - uncheckedOffset
+                    val current = currentOffset - uncheckedOffset
+                    (current / total).coerceIn(0f, 1f)
+                }
+            }
+        } else {
+            0f
+        }
+    }
+
+    private val animatable = Animatable(boundsOffset(isChecked))
+
+    @Composable
+    fun handleComposable() {
+        LaunchedEffect(
+            isReady,
+            isChecked,
+            uncheckedOffset,
+            checkedOffset,
+        ) {
+            updateOffsetByState()
+        }
+    }
+
+    fun handleMove(delta: Float) {
+        val offset = currentOffset + delta
+        currentOffset = offset.coerceIn(uncheckedOffset, checkedOffset)
+    }
+
+    suspend fun handleFling(velocity: Float) {
+        val offset = if (velocity.absoluteValue > 200f) {
+            if (velocity > 0) checkedOffset else uncheckedOffset
+        } else {
+            boundsValue(currentOffset, uncheckedOffset, checkedOffset)
+        }
+        animateToOffset(offset, velocity)
+    }
+
+    suspend fun handleClick() {
+        if (animatable.isRunning) return
+        val offset = boundsOffset(!isChecked)
+        animateToOffset(offset)
+    }
+
+    private suspend fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
+        if (currentOffset == offset) {
+            notifyCallback()
+            return
+        }
+
+        animatable.snapTo(currentOffset)
+        animatable.animateTo(
+            targetValue = offset,
+            initialVelocity = initialVelocity ?: animatable.velocity,
+        ) { currentOffset = value.coerceIn(uncheckedOffset, checkedOffset) }
+        notifyCallback()
+    }
+
+    private fun updateOffsetByState() {
+        if (isReady && !animatable.isRunning) {
+            currentOffset = boundsOffset(isChecked)
+        }
+    }
+
+    private fun boundsOffset(isChecked: Boolean): Float {
+        return if (isChecked) checkedOffset else uncheckedOffset
+    }
+
+    private fun notifyCallback() {
+        when (currentOffset) {
+            uncheckedOffset -> {
+                if (isChecked) {
+                    isChecked = false
+                    onCheckedChange?.invoke(false)
+                }
+            }
+            checkedOffset -> {
+                if (!isChecked) {
+                    isChecked = true
+                    onCheckedChange?.invoke(true)
+                }
+            }
         }
     }
 }
