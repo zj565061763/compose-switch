@@ -50,7 +50,7 @@ fun FSwitch(
                             val change = it.positionChange()
                             it.consume()
                             hasMove = true
-                            state.handleMove(change.x)
+                            state.handleDrag(change.x)
                         }
                     },
                     onUp = {
@@ -141,7 +141,7 @@ private class FSwitchState(
         }
     }
 
-    fun handleMove(delta: Float) {
+    fun handleDrag(delta: Float) {
         val offset = currentOffset + delta
         currentOffset = offset.coerceIn(uncheckedOffset, checkedOffset)
     }
