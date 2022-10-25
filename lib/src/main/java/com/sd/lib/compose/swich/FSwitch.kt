@@ -53,13 +53,13 @@ fun FSwitch(
                             state.handleDrag(change.x)
                         }
                     },
-                    onUp = {
-                        if (pointerCount == 1 && !it.isConsumed) {
+                    onUp = { input ->
+                        if (!input.isConsumed && pointerCount == 1) {
                             if (hasMove) {
-                                val velocity = getPointerVelocity(it.id).x
+                                val velocity = getPointerVelocity(input.id).x
                                 coroutineScope.launch { state.handleFling(velocity) }
                             } else {
-                                if (maxPointerCount == 1 && (it.uptimeMillis - it.previousUptimeMillis) < 200) {
+                                if (maxPointerCount == 1 && (input.uptimeMillis - input.previousUptimeMillis) < 200) {
                                     coroutineScope.launch { state.handleClick() }
                                 }
                             }
