@@ -3,15 +3,55 @@
 [![](https://jitpack.io/v/zj565061763/compose-switch.svg)](https://jitpack.io/#zj565061763/comopse-switch)
 
 # Demo
-![](https://thumbsnap.com/i/KNsmBcg9.gif?1025)
+![](https://thumbsnap.com/i/NdkgQub4.gif?1025)
 
 ```kotlin
 @Composable
 fun Content() {
-    Box(Modifier.fillMaxSize()) {
-        FSwitch {
-            Log.i(TAG, "onCheckedChange: $it")
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(state = rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+
+        FSwitch(onCheckedChange = { logMsg { "onCheckedChange: $it" } })
+
+        FSwitch(
+            background = {
+                FSwitchBackground(
+                    progress = it,
+                    colorChecked = Color.Red,
+                    shape = RoundedCornerShape(5.dp),
+                )
+            },
+            thumb = {
+                FSwitchThumb(shape = RoundedCornerShape(5.dp))
+            },
+            onCheckedChange = {}
+        )
+
+        FSwitch(
+            background = {
+                FSwitchBackground(
+                    modifier = Modifier.fillMaxHeight(it.coerceAtLeast(0.2f)),
+                    progress = it,
+                    shape = RoundedCornerShape(5.dp)
+                )
+            },
+            thumb = {
+                Card(
+                    modifier = Modifier
+                        .aspectRatio(1f, true)
+                        .padding(start = 0.dp, end = 2.dp, top = 2.dp, bottom = 2.dp),
+                    shape = RoundedCornerShape(5.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(Dp.Hairline, Color(0xFFE3E3E3))
+                ) {}
+            },
+            onCheckedChange = {}
+        )
     }
 }
 ```
