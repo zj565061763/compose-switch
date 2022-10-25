@@ -45,10 +45,10 @@ fun FSwitch(
                         enableVelocity = true
                         hasMove = false
                     },
-                    onMove = {
-                        if (it.id == currentEvent?.changes?.first()?.id) {
-                            val change = it.positionChange()
-                            it.consume()
+                    onMove = { input ->
+                        if (!input.isConsumed && input.id == currentEvent?.changes?.first()?.id) {
+                            val change = input.positionChange()
+                            input.consume()
                             hasMove = true
                             state.handleDrag(change.x)
                         }
