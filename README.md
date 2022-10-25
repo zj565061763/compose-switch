@@ -4,3 +4,14 @@
 
 # Demo
 ![](https://thumbsnap.com/i/KNsmBcg9.gif?1025)
+
+```kotlin
+@Composable
+fun Content() {
+    Box(Modifier.fillMaxSize()) {
+        FSwitch {
+            Log.i(TAG, "onCheckedChange: $it")
+        }
+    }
+}
+```
