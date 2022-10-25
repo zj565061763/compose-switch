@@ -55,7 +55,7 @@ fun Content() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        FSwitch(onCheckedChange = {})
+        FSwitch(onCheckedChange = { logMsg { "onCheckedChange: $it" } })
 
         FSwitch(
             background = {
