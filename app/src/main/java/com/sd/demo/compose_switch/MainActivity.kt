@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_switch.ui.theme.AppTheme
 import com.sd.lib.compose.swich.FSwitch
@@ -59,17 +63,35 @@ fun Content() {
 
         FSwitch(
             background = {
-                FSwitchBackground(progress = it, colorChecked = Color.Red)
+                FSwitchBackground(
+                    progress = it,
+                    colorChecked = Color.Red,
+                    shape = RoundedCornerShape(5.dp),
+                )
+            },
+            thumb = {
+                FSwitchThumb(shape = RoundedCornerShape(5.dp))
             },
             onCheckedChange = {}
         )
 
         FSwitch(
             background = {
-                FSwitchBackground(progress = it, shape = RoundedCornerShape(5.dp))
+                FSwitchBackground(
+                    modifier = Modifier.fillMaxHeight(it.coerceAtLeast(0.2f)),
+                    progress = it,
+                    shape = RoundedCornerShape(5.dp)
+                )
             },
             thumb = {
-                FSwitchThumb(shape = RoundedCornerShape(5.dp))
+                Card(
+                    modifier = Modifier
+                        .aspectRatio(1f, true)
+                        .padding(start = 0.dp, end = 2.dp, top = 2.dp, bottom = 2.dp),
+                    shape = RoundedCornerShape(5.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = BorderStroke(Dp.Hairline, Color(0xFFE3E3E3))
+                ) {}
             },
             onCheckedChange = {}
         )
