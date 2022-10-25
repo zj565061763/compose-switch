@@ -55,7 +55,7 @@ fun Content() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         FSwitch(isChecked) {
-            Log.i(TAG, "onCheckedChange: $it")
+            logMsg { "onCheckedChange: $it" }
         }
     }
 }
@@ -66,4 +66,8 @@ fun DefaultPreview() {
     AppTheme {
         Content()
     }
+}
+
+fun logMsg(block: () -> String) {
+    Log.i("compose-switch-demo", block())
 }
