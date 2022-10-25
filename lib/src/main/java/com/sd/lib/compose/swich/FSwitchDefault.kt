@@ -1,10 +1,7 @@
 package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -39,12 +36,13 @@ fun FSwitchBackground(
 fun FSwitchThumb(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
+    paddings: PaddingValues = PaddingValues(2.dp),
     shape: Shape = RoundedCornerShape(50)
 ) {
     Box(
         modifier = modifier
             .aspectRatio(1f, true)
-            .padding(2.dp)
+            .padding(paddings)
             .background(
                 color = color,
                 shape = shape,

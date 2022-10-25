@@ -71,7 +71,13 @@ fun FSwitch(
             }
         }
     ) {
-        background(state.progress)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            background(state.progress)
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxHeight()
