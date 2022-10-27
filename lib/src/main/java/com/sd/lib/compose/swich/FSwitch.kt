@@ -1,5 +1,6 @@
 package com.sd.lib.compose.swich
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
@@ -54,13 +55,15 @@ fun FSwitch(
                         }
                     },
                     onUp = { input ->
-                        if (!input.isConsumed && pointerCount == 1) {
+                        if (pointerCount == 1) {
                             if (hasMove) {
                                 val velocity = getPointerVelocity(input.id).x
                                 coroutineScope.launch { state.handleFling(velocity) }
                             } else {
-                                if (maxPointerCount == 1 && (input.uptimeMillis - input.previousUptimeMillis) < 200) {
-                                    coroutineScope.launch { state.handleClick() }
+                                if (!input.isConsumed && maxPointerCount == 1) {
+                                    if ((input.uptimeMillis - input.previousUptimeMillis) < 200) {
+                                        coroutineScope.launch { state.handleClick() }
+                                    }
                                 }
                             }
                         }
@@ -213,4 +216,8 @@ private fun boundsValue(value: Float, minBounds: Float, maxBounds: Float): Float
     require(value in minBounds..maxBounds)
     val center = (maxBounds - minBounds) / 2
     return if (value > center) maxBounds else minBounds
+}
+
+internal fun logMsg(block: () -> String) {
+    Log.i("compose-switch", block())
 }
