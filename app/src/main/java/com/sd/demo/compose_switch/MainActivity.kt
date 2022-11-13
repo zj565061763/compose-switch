@@ -59,7 +59,11 @@ fun Content() {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
 
-        FSwitch(onCheckedChange = { logMsg { "onCheckedChange: $it" } })
+
+        FSwitch {
+            logMsg { "onCheckedChange: $it" }
+        }
+
 
         FSwitch(
             background = {
@@ -72,8 +76,10 @@ fun Content() {
             thumb = {
                 FSwitchThumb(shape = RoundedCornerShape(5.dp))
             },
-            onCheckedChange = {}
-        )
+        ) {
+            logMsg { "onCheckedChange: $it" }
+        }
+
 
         FSwitch(
             background = {
@@ -93,8 +99,9 @@ fun Content() {
                     border = BorderStroke(Dp.Hairline, Color(0xFFE3E3E3))
                 ) {}
             },
-            onCheckedChange = {}
-        )
+        ) {
+            logMsg { "onCheckedChange: $it" }
+        }
     }
 }
 
@@ -107,5 +114,5 @@ fun DefaultPreview() {
 }
 
 fun logMsg(block: () -> String) {
-    Log.i("compose-switch-demo", block())
+    Log.i("FSwitch-demo", block())
 }

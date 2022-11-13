@@ -219,5 +219,5 @@ private fun boundsValue(value: Float, minBounds: Float, maxBounds: Float): Float
 }
 
 internal fun logMsg(block: () -> String) {
-    Log.i("compose-switch", block())
+    Log.i("FSwitch", block())
 }
