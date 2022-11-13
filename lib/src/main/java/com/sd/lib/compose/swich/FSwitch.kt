@@ -123,13 +123,15 @@ private class FSwitchState(checked: Boolean) {
         private set
 
     val progress: Float by derivedStateOf {
-        if (_checkedOffset > _uncheckedOffset) {
+        val checkedOffset = _checkedOffset
+        val uncheckedOffset = _uncheckedOffset
+        if (checkedOffset > uncheckedOffset) {
             when {
-                currentOffset <= _uncheckedOffset -> 0f
-                currentOffset >= _checkedOffset -> 1f
+                currentOffset <= uncheckedOffset -> 0f
+                currentOffset >= checkedOffset -> 1f
                 else -> {
-                    val total = _checkedOffset - _uncheckedOffset
-                    val current = currentOffset - _uncheckedOffset
+                    val total = checkedOffset - uncheckedOffset
+                    val current = currentOffset - uncheckedOffset
                     (current / total).coerceIn(0f, 1f)
                 }
             }
