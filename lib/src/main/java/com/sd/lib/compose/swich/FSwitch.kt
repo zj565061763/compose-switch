@@ -35,7 +35,6 @@ fun FSwitch(
         it.HandleComposable(checked)
     }
 
-    val enabledUpdated by rememberUpdatedState(enabled)
     val coroutineScope = rememberCoroutineScope()
     var hasMove by remember { mutableStateOf(false) }
 
@@ -44,7 +43,7 @@ fun FSwitch(
         .height(25.dp)
         .onSizeChanged { boxSize = it }
         .run {
-            if (state.isReady && enabledUpdated) {
+            if (state.isReady && enabled) {
                 fPointerChange(
                     onStart = {
                         enableVelocity = true
