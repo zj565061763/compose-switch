@@ -32,7 +32,7 @@ fun FSwitch(
         it.boxSize = boxSize.width.toFloat()
         it.thumbSize = thumbSize.width.toFloat()
         it.onCheckedChange = onCheckedChange
-        it.handleComposable(checked)
+        it.HandleComposable(checked)
     }
 
     val enabledUpdated by rememberUpdatedState(enabled)
@@ -142,7 +142,7 @@ private class FSwitchState(checked: Boolean) {
 
 
     @Composable
-    fun handleComposable(checked: Boolean) {
+    fun HandleComposable(checked: Boolean) {
         LaunchedEffect(checked) {
             _isChecked = checked
         }
