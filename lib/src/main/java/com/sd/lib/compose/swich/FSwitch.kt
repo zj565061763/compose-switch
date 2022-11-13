@@ -221,7 +221,7 @@ private class FSwitchState(
 
 private fun boundsValue(value: Float, minBounds: Float, maxBounds: Float): Float {
     require(value in minBounds..maxBounds)
-    val center = (maxBounds - minBounds) / 2
+    val center = (maxBounds + minBounds) / 2
     return if (value > center) maxBounds else minBounds
 }
 
