@@ -53,9 +53,10 @@ fun FSwitch(
                     onMove = { input ->
                         if (!input.isConsumed && pointerCount == 1) {
                             val change = input.positionChange()
-                            input.consume()
-                            hasMove = true
-                            state.handleDrag(change.x)
+                            if (state.handleDrag(change.x)) {
+                                input.consume()
+                                hasMove = true
+                            }
                         }
                     },
                     onUp = { input ->
@@ -123,6 +124,7 @@ private class FSwitchState(checked: Boolean) {
         private set
 
     val progress: Float by derivedStateOf {
+        val currentOffset = currentOffset
         val checkedOffset = _checkedOffset
         val uncheckedOffset = _uncheckedOffset
         if (checkedOffset > uncheckedOffset) {
@@ -140,6 +142,14 @@ private class FSwitchState(checked: Boolean) {
         }
     }
 
+    private var _internalOffset = currentOffset
+        set(value) {
+            val newValue = value.coerceIn(_uncheckedOffset, _checkedOffset)
+            if (field != newValue) {
+                field = newValue
+                currentOffset = newValue
+            }
+        }
 
     @Composable
     fun HandleComposable(checked: Boolean) {
@@ -157,16 +167,17 @@ private class FSwitchState(checked: Boolean) {
         }
     }
 
-    fun handleDrag(delta: Float) {
-        val offset = currentOffset + delta
-        currentOffset = offset.coerceIn(_uncheckedOffset, _checkedOffset)
+    fun handleDrag(delta: Float): Boolean {
+        val oldOffset = _internalOffset
+        _internalOffset += delta
+        return _internalOffset != oldOffset
     }
 
     suspend fun handleFling(velocity: Float) {
         val offset = if (velocity.absoluteValue > 200f) {
             if (velocity > 0) _checkedOffset else _uncheckedOffset
         } else {
-            boundsValue(currentOffset, _uncheckedOffset, _checkedOffset)
+            boundsValue(_internalOffset, _uncheckedOffset, _checkedOffset)
         }
         animateToOffset(offset, velocity)
     }
@@ -178,22 +189,23 @@ private class FSwitchState(checked: Boolean) {
     }
 
     private suspend fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
-        if (currentOffset == offset) {
+        try {
+            _animOffset.snapTo(_internalOffset)
+            _animOffset.animateTo(
+                targetValue = offset,
+                initialVelocity = initialVelocity ?: _animOffset.velocity,
+            ) {
+                _internalOffset = value
+            }
+        } finally {
             notifyCallback()
-            return
+            updateOffsetByState()
         }
-
-        _animOffset.snapTo(currentOffset)
-        _animOffset.animateTo(
-            targetValue = offset,
-            initialVelocity = initialVelocity ?: _animOffset.velocity,
-        ) { currentOffset = value.coerceIn(_uncheckedOffset, _checkedOffset) }
-        notifyCallback()
     }
 
     private fun updateOffsetByState() {
         if (isReady && !_animOffset.isRunning) {
-            currentOffset = boundsOffset(_isChecked)
+            _internalOffset = boundsOffset(_isChecked)
         }
     }
 
@@ -202,7 +214,7 @@ private class FSwitchState(checked: Boolean) {
     }
 
     private fun notifyCallback() {
-        when (currentOffset) {
+        when (_internalOffset) {
             _uncheckedOffset -> {
                 if (_isChecked) {
                     _isChecked = false
@@ -219,10 +231,10 @@ private class FSwitchState(checked: Boolean) {
     }
 }
 
-private fun boundsValue(value: Float, minBounds: Float, maxBounds: Float): Float {
-    require(value in minBounds..maxBounds)
-    val center = (maxBounds + minBounds) / 2
-    return if (value > center) maxBounds else minBounds
+private fun boundsValue(value: Float, min: Float, max: Float): Float {
+    require(value in min..max)
+    val center = (min + max) / 2
+    return if (value > center) max else min
 }
 
 internal fun logMsg(block: () -> String) {
