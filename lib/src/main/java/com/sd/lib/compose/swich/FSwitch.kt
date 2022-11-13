@@ -7,8 +7,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fPointerChange
 import kotlinx.coroutines.launch
@@ -24,7 +25,12 @@ fun FSwitch(
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    var boxSize by remember { mutableStateOf(IntSize.Zero) }
+    var thumbSize by remember { mutableStateOf(IntSize.Zero) }
+
     val state = remember { FSwitchState(checked) }.also {
+        it.boxSize = boxSize.width.toFloat()
+        it.thumbSize = thumbSize.width.toFloat()
         it.onCheckedChange = onCheckedChange
         it.handleComposable(checked)
     }
@@ -36,9 +42,7 @@ fun FSwitch(
     Box(modifier = modifier
         .width(50.dp)
         .height(25.dp)
-        .onPlaced {
-            state.boxSize = it.size.width.toFloat()
-        }
+        .onSizeChanged { boxSize = it }
         .run {
             if (state.isReady && enabledUpdated) {
                 fPointerChange(
@@ -47,7 +51,7 @@ fun FSwitch(
                         hasMove = false
                     },
                     onMove = { input ->
-                        if (!input.isConsumed && input.id == currentEvent?.changes?.first()?.id) {
+                        if (!input.isConsumed && pointerCount == 1) {
                             val change = input.positionChange()
                             input.consume()
                             hasMove = true
@@ -61,7 +65,8 @@ fun FSwitch(
                                 coroutineScope.launch { state.handleFling(velocity) }
                             } else {
                                 if (!input.isConsumed && maxPointerCount == 1) {
-                                    if ((input.uptimeMillis - input.previousUptimeMillis) < 200) {
+                                    val clickTime = input.uptimeMillis - input.previousUptimeMillis
+                                    if (clickTime < 200) {
                                         coroutineScope.launch { state.handleClick() }
                                     }
                                 }
@@ -74,22 +79,23 @@ fun FSwitch(
             }
         }
     ) {
+
+
+        // Background
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.matchParentSize(),
             contentAlignment = Alignment.Center,
         ) {
             background(state.progress)
         }
 
+
+        // Thumb
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .onPlaced {
-                    state.thumbSize = it.size.width.toFloat()
-                }
-                .offset {
-                    IntOffset(state.currentOffset.roundToInt(), 0)
-                },
+                .onSizeChanged { thumbSize = it }
+                .offset { IntOffset(state.currentOffset.roundToInt(), 0) },
             contentAlignment = Alignment.Center,
         ) {
             thumb(state.progress)
@@ -100,12 +106,13 @@ fun FSwitch(
 private class FSwitchState(
     checked: Boolean
 ) {
-    var isChecked: Boolean by mutableStateOf(checked)
-    var onCheckedChange: ((Boolean) -> Unit)? = null
-
     var boxSize: Float by mutableStateOf(0f)
     var thumbSize: Float by mutableStateOf(0f)
+    var onCheckedChange: ((Boolean) -> Unit)? = null
+
     val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
+
+    var isChecked: Boolean by mutableStateOf(checked)
 
     val uncheckedOffset: Float by mutableStateOf(0f)
     val checkedOffset: Float by derivedStateOf {
