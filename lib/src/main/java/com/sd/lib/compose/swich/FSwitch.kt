@@ -173,7 +173,7 @@ private class FSwitchState(checked: Boolean) {
     }
 
     suspend fun handleFling(velocity: Float) {
-        val offset = if (velocity.absoluteValue > 200f) {
+        val offset = if (velocity.absoluteValue > 1000f) {
             if (velocity > 0) _checkedOffset else _uncheckedOffset
         } else {
             boundsValue(_internalOffset, _uncheckedOffset, _checkedOffset)
