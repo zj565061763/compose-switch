@@ -216,24 +216,24 @@ private class FSwitchState(
 
     private fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
         _scope.launch {
-            try {
-                _animOffset.snapTo(_internalOffset)
-                _animOffset.animateTo(
-                    targetValue = offset,
-                    initialVelocity = initialVelocity ?: _animOffset.velocity,
-                ) { _internalOffset = value }
+            _animOffset.snapTo(_internalOffset)
+            _animOffset.animateTo(
+                targetValue = offset,
+                initialVelocity = initialVelocity ?: _animOffset.velocity,
+            ) { _internalOffset = value }
 
-                notifyCallback()
-                delay(500)
-            } finally {
-                updateOffsetByState()
-            }
-        }.also { _animJob = it }
+            notifyCallback()
+            delay(500)
+            updateOffsetByState()
+        }.also {
+            _animJob = it
+        }
     }
 
     private fun updateOffsetByState() {
         if (isReady && !_animOffset.isRunning) {
             _internalOffset = boundsOffset(_isChecked)
+            logMsg { "updateOffsetByState" }
         }
     }
 
