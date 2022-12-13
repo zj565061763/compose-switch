@@ -224,8 +224,9 @@ private class FSwitchState(
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
 
-            notifyCallback()
-            delay(500)
+            if (notifyCallback()) {
+                delay(500)
+            }
             updateOffsetByState()
         }.also {
             _animJob = it
@@ -243,11 +244,12 @@ private class FSwitchState(
         return if (isChecked) _checkedOffset else _uncheckedOffset
     }
 
-    private fun notifyCallback() {
-        when (_internalOffset) {
-            _uncheckedOffset -> onCheckedChange?.invoke(false)
-            _checkedOffset -> onCheckedChange?.invoke(true)
-        }
+    private fun notifyCallback(): Boolean {
+        val checked = _internalOffset == _checkedOffset
+        if (checked == _isChecked) return false
+        val callback = onCheckedChange ?: return false
+        callback(checked)
+        return true
     }
 }
 
