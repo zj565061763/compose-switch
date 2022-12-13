@@ -84,7 +84,6 @@ fun FSwitch(
         }
     ) {
 
-
         // Background
         Box(
             modifier = Modifier.matchParentSize(),
@@ -92,7 +91,6 @@ fun FSwitch(
         ) {
             background(state.progress)
         }
-
 
         // Thumb
         Box(
