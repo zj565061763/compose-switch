@@ -119,7 +119,8 @@ private class FSwitchState(
     val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
 
     private val _uncheckedOffset = 0f
-    private var _checkedOffset by mutableStateOf(0f)
+    private var _checkedOffset = 0f
+    var progress by mutableStateOf(0f)
 
     private var _isChecked = checked
         set(value) {
@@ -135,31 +136,13 @@ private class FSwitchState(
     var currentOffset: Float by mutableStateOf(boundsOffset(checked))
         private set
 
-    val progress: Float by derivedStateOf {
-        val currentOffset = currentOffset
-        val checkedOffset = _checkedOffset
-        val uncheckedOffset = _uncheckedOffset
-        if (checkedOffset > uncheckedOffset) {
-            when {
-                currentOffset <= uncheckedOffset -> 0f
-                currentOffset >= checkedOffset -> 1f
-                else -> {
-                    val total = checkedOffset - uncheckedOffset
-                    val current = currentOffset - uncheckedOffset
-                    (current / total).coerceIn(0f, 1f)
-                }
-            }
-        } else {
-            0f
-        }
-    }
-
     private var _internalOffset = currentOffset
         set(value) {
             val newValue = value.coerceIn(_uncheckedOffset, _checkedOffset)
             if (field != newValue) {
                 field = newValue
                 currentOffset = newValue
+                updateProgress()
             }
         }
 
@@ -176,6 +159,25 @@ private class FSwitchState(
     private fun updateCheckedOffset() {
         val delta = (_boxSize - _thumbSize).coerceAtLeast(0f)
         _checkedOffset = _uncheckedOffset + delta
+    }
+
+    private fun updateProgress() {
+        val checkedOffset = _checkedOffset
+        val uncheckedOffset = _uncheckedOffset
+        progress = if (checkedOffset > uncheckedOffset) {
+            val currentOffset = currentOffset
+            when {
+                currentOffset <= uncheckedOffset -> 0f
+                currentOffset >= checkedOffset -> 1f
+                else -> {
+                    val total = checkedOffset - uncheckedOffset
+                    val current = currentOffset - uncheckedOffset
+                    (current / total).coerceIn(0f, 1f)
+                }
+            }
+        } else {
+            0f
+        }
     }
 
     @Composable
