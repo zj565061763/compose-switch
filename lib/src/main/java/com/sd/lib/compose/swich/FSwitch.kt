@@ -12,6 +12,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fPointerChange
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -28,14 +31,15 @@ fun FSwitch(
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
 
-    val state = remember { FSwitchState(checked) }.also {
+    val coroutineScope = rememberCoroutineScope()
+    val state = remember { FSwitchState(checked, coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.setBoxSize(boxSize.width.toFloat())
         it.setThumbSize(thumbSize.width.toFloat())
         it.HandleComposable(checked)
     }
 
-    val coroutineScope = rememberCoroutineScope()
+
     var hasMove by remember { mutableStateOf(false) }
 
     Box(modifier = modifier
@@ -62,12 +66,12 @@ fun FSwitch(
                         if (pointerCount == 1) {
                             if (hasMove) {
                                 val velocity = getPointerVelocity(input.id).x
-                                coroutineScope.launch { state.handleFling(velocity) }
+                                state.handleFling(velocity)
                             } else {
                                 if (!input.isConsumed && maxPointerCount == 1) {
                                     val clickTime = input.uptimeMillis - input.previousUptimeMillis
                                     if (clickTime < 200) {
-                                        coroutineScope.launch { state.handleClick() }
+                                        state.handleClick()
                                     }
                                 }
                             }
@@ -103,7 +107,11 @@ fun FSwitch(
     }
 }
 
-private class FSwitchState(checked: Boolean) {
+private class FSwitchState(
+    checked: Boolean,
+    scope: CoroutineScope,
+) {
+    private val _scope = scope
     var onCheckedChange: ((Boolean) -> Unit)? = null
 
     private var _boxSize: Float by mutableStateOf(0f)
@@ -113,8 +121,16 @@ private class FSwitchState(checked: Boolean) {
     private val _uncheckedOffset = 0f
     private var _checkedOffset by mutableStateOf(0f)
 
-    private var _isChecked by mutableStateOf(checked)
+    private var _isChecked = checked
+        set(value) {
+            if (field != value) {
+                field = value
+                _animJob?.cancel()
+            }
+        }
+
     private val _animOffset = Animatable(boundsOffset(checked))
+    private var _animJob: Job? = null
 
     var currentOffset: Float by mutableStateOf(boundsOffset(checked))
         private set
@@ -164,10 +180,7 @@ private class FSwitchState(checked: Boolean) {
 
     @Composable
     fun HandleComposable(checked: Boolean) {
-        LaunchedEffect(checked) {
-            _isChecked = checked
-        }
-
+        _isChecked = checked
         LaunchedEffect(
             isReady,
             _isChecked,
@@ -179,12 +192,14 @@ private class FSwitchState(checked: Boolean) {
     }
 
     fun handleDrag(delta: Float): Boolean {
+        if (_animJob?.isActive == true) return false
         val oldOffset = _internalOffset
         _internalOffset += delta
         return _internalOffset != oldOffset
     }
 
-    suspend fun handleFling(velocity: Float) {
+    fun handleFling(velocity: Float) {
+        if (_animJob?.isActive == true) return
         val offset = if (velocity.absoluteValue > 1000f) {
             if (velocity > 0) _checkedOffset else _uncheckedOffset
         } else {
@@ -193,25 +208,27 @@ private class FSwitchState(checked: Boolean) {
         animateToOffset(offset, velocity)
     }
 
-    suspend fun handleClick() {
-        if (_animOffset.isRunning) return
+    fun handleClick() {
+        if (_animJob?.isActive == true) return
         val offset = boundsOffset(!_isChecked)
         animateToOffset(offset)
     }
 
-    private suspend fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
-        try {
-            _animOffset.snapTo(_internalOffset)
-            _animOffset.animateTo(
-                targetValue = offset,
-                initialVelocity = initialVelocity ?: _animOffset.velocity,
-            ) {
-                _internalOffset = value
+    private fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
+        _scope.launch {
+            try {
+                _animOffset.snapTo(_internalOffset)
+                _animOffset.animateTo(
+                    targetValue = offset,
+                    initialVelocity = initialVelocity ?: _animOffset.velocity,
+                ) { _internalOffset = value }
+
+                notifyCallback()
+                delay(500)
+            } finally {
+                updateOffsetByState()
             }
-        } finally {
-            notifyCallback()
-            updateOffsetByState()
-        }
+        }.also { _animJob = it }
     }
 
     private fun updateOffsetByState() {
@@ -226,18 +243,8 @@ private class FSwitchState(checked: Boolean) {
 
     private fun notifyCallback() {
         when (_internalOffset) {
-            _uncheckedOffset -> {
-                if (_isChecked) {
-                    _isChecked = false
-                    onCheckedChange?.invoke(false)
-                }
-            }
-            _checkedOffset -> {
-                if (!_isChecked) {
-                    _isChecked = true
-                    onCheckedChange?.invoke(true)
-                }
-            }
+            _uncheckedOffset -> onCheckedChange?.invoke(false)
+            _checkedOffset -> onCheckedChange?.invoke(true)
         }
     }
 }
