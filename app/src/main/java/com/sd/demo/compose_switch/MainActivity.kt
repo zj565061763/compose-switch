@@ -69,7 +69,7 @@ private fun SampleDefault() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(checked) {
         logMsg { "onCheckedChange: $it" }
-//        checked = it
+        checked = it
     }
 }
 
