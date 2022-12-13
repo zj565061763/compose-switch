@@ -11,7 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,24 +23,13 @@ import com.sd.lib.compose.swich.FSwitch
 import com.sd.lib.compose.swich.FSwitchBackground
 import com.sd.lib.compose.swich.FSwitchThumb
 
-private const val TAG = "MainActivity"
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background,
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(10.dp)
-                    ) {
-                        Content()
-                    }
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    Content()
                 }
             }
         }
@@ -53,11 +41,11 @@ fun Content() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(state = rememberScrollState()),
+            .verticalScroll(state = rememberScrollState())
+            .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-
         SampleDefault()
         SampleCustom1()
         SampleCustom2()
