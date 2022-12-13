@@ -255,6 +255,6 @@ private fun boundsValue(value: Float, min: Float, max: Float): Float {
     return if (value > center) max else min
 }
 
-internal fun logMsg(block: () -> String) {
+internal inline fun logMsg(block: () -> String) {
     Log.i("FSwitch", block())
 }
