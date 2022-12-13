@@ -29,9 +29,9 @@ fun FSwitch(
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
 
     val state = remember { FSwitchState(checked) }.also {
+        it.onCheckedChange = onCheckedChange
         it.setBoxSize(boxSize.width.toFloat())
         it.setThumbSize(thumbSize.width.toFloat())
-        it.onCheckedChange = onCheckedChange
         it.HandleComposable(checked)
     }
 
