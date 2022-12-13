@@ -242,7 +242,6 @@ private class FSwitchState(
     private fun updateOffsetByState() {
         if (isReady && !_animOffset.isRunning) {
             _internalOffset = boundsOffset(_isChecked)
-            logMsg { "updateOffsetByState" }
         }
     }
 
