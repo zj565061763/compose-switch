@@ -29,8 +29,8 @@ fun FSwitch(
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
 
     val state = remember { FSwitchState(checked) }.also {
-        it.boxSize = boxSize.width.toFloat()
-        it.thumbSize = thumbSize.width.toFloat()
+        it.setBoxSize(boxSize.width.toFloat())
+        it.setThumbSize(thumbSize.width.toFloat())
         it.onCheckedChange = onCheckedChange
         it.HandleComposable(checked)
     }
@@ -104,17 +104,14 @@ fun FSwitch(
 }
 
 private class FSwitchState(checked: Boolean) {
-    var boxSize: Float by mutableStateOf(0f)
-    var thumbSize: Float by mutableStateOf(0f)
     var onCheckedChange: ((Boolean) -> Unit)? = null
 
-    val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
+    private var _boxSize: Float by mutableStateOf(0f)
+    private var _thumbSize: Float by mutableStateOf(0f)
+    val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
 
-    private val _uncheckedOffset by mutableStateOf(0f)
-    private val _checkedOffset by derivedStateOf {
-        val delta = (boxSize - thumbSize).coerceAtLeast(0f)
-        _uncheckedOffset + delta
-    }
+    private val _uncheckedOffset = 0f
+    private var _checkedOffset by mutableStateOf(0f)
 
     private var _isChecked by mutableStateOf(checked)
     private val _animOffset = Animatable(boundsOffset(checked))
@@ -149,6 +146,21 @@ private class FSwitchState(checked: Boolean) {
                 currentOffset = newValue
             }
         }
+
+    fun setBoxSize(size: Float) {
+        _boxSize = size
+        updateCheckedOffset()
+    }
+
+    fun setThumbSize(size: Float) {
+        _thumbSize = size
+        updateCheckedOffset()
+    }
+
+    private fun updateCheckedOffset() {
+        val delta = (_boxSize - _thumbSize).coerceAtLeast(0f)
+        _checkedOffset = _uncheckedOffset + delta
+    }
 
     @Composable
     fun HandleComposable(checked: Boolean) {
