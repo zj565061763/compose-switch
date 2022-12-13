@@ -118,7 +118,6 @@ private class FSwitchState(
 
     private val _uncheckedOffset = 0f
     private var _checkedOffset = 0f
-    var progress by mutableStateOf(0f)
 
     private var _isChecked = checked
         set(value) {
@@ -130,6 +129,9 @@ private class FSwitchState(
 
     private val _animOffset = Animatable(boundsOffset(checked))
     private var _animJob: Job? = null
+
+    var progress: Float by mutableStateOf(0f)
+        private set
 
     var currentOffset: Float by mutableStateOf(boundsOffset(checked))
         private set
