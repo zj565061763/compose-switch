@@ -21,12 +21,12 @@ import kotlin.math.roundToInt
 
 @Composable
 fun FSwitch(
-    checked: Boolean = false,
+    checked: Boolean,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
-    onCheckedChange: (Boolean) -> Unit,
+    onCheckedChange: ((Boolean) -> Unit)?,
 ) {
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
