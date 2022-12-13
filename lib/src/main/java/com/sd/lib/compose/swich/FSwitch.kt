@@ -194,14 +194,18 @@ private class FSwitchState(
     }
 
     fun handleDrag(delta: Float): Boolean {
+        if (_checkedOffset == _uncheckedOffset) return false
         if (_animJob?.isActive == true) return false
+
         val oldOffset = _internalOffset
         _internalOffset += delta
         return _internalOffset != oldOffset
     }
 
     fun handleFling(velocity: Float) {
+        if (_checkedOffset == _uncheckedOffset) return
         if (_animJob?.isActive == true) return
+
         val offset = if (velocity.absoluteValue > 1000f) {
             if (velocity > 0) _checkedOffset else _uncheckedOffset
         } else {
@@ -211,7 +215,9 @@ private class FSwitchState(
     }
 
     fun handleClick() {
+        if (_checkedOffset == _uncheckedOffset) return
         if (_animJob?.isActive == true) return
+
         val offset = boundsOffset(!_isChecked)
         animateToOffset(offset)
     }
@@ -245,6 +251,7 @@ private class FSwitchState(
     }
 
     private fun notifyCallback(): Boolean {
+        if (_checkedOffset == _uncheckedOffset) return false
         val checked = _internalOffset == _checkedOffset
         if (checked == _isChecked) return false
         val callback = onCheckedChange ?: return false
