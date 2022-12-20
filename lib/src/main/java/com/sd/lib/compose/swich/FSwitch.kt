@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
@@ -99,6 +100,9 @@ fun FSwitch(
         Box(
             modifier = Modifier
                 .fillMaxHeight()
+                .graphicsLayer {
+                    this.alpha = if (state.isFirst) 0f else 1f
+                }
                 .onSizeChanged { thumbSize = it }
                 .offset { IntOffset(state.currentOffset.roundToInt(), 0) },
             contentAlignment = Alignment.Center,
@@ -115,11 +119,14 @@ private class FSwitchState(
     private val _scope = scope
     var onCheckedChange: ((Boolean) -> Unit)? = null
 
-    private var _isFirst = true
     private var _interactiveMode = false
+
     private var _boxSize: Float by mutableStateOf(0f)
     private var _thumbSize: Float by mutableStateOf(0f)
     val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
+
+    var isFirst: Boolean by mutableStateOf(true)
+        private set
 
     private val _uncheckedOffset = 0f
     private var _checkedOffset = 0f
@@ -272,9 +279,9 @@ private class FSwitchState(
     private fun updateOffsetByState() {
         if (!isReady) return
 
-        if (_isFirst) {
-            _isFirst = false
+        if (isFirst) {
             updateOffsetByStateStatic()
+            isFirst = false
             return
         }
 
