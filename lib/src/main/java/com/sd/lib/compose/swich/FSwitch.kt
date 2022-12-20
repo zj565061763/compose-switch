@@ -114,6 +114,7 @@ private class FSwitchState(
     private val _scope = scope
     var onCheckedChange: ((Boolean) -> Unit)? = null
 
+    private var _isFirst = true
     private var _interactiveMode = false
     private var _boxSize: Float by mutableStateOf(0f)
     private var _thumbSize: Float by mutableStateOf(0f)
@@ -196,7 +197,7 @@ private class FSwitchState(
             _uncheckedOffset,
             _checkedOffset,
         ) {
-            updateOffsetIfIdle()
+            updateOffsetByState()
         }
     }
 
@@ -219,7 +220,7 @@ private class FSwitchState(
         } else {
             boundsValue(_internalOffset, _uncheckedOffset, _checkedOffset)
         }
-        animateToOffset(offset, velocity)
+        animateToOffsetInteractive(offset, velocity)
     }
 
     fun handleClick() {
@@ -228,15 +229,31 @@ private class FSwitchState(
 
         if (_interactiveMode) {
             val offset = boundsOffset(!_isChecked)
-            animateToOffset(offset)
+            animateToOffsetInteractive(offset)
         } else {
             onCheckedChange?.invoke(!_isChecked)
+        }
+    }
+
+    private fun animateToOffsetInteractive(
+        offset: Float,
+        initialVelocity: Float? = null,
+    ) {
+        animateToOffset(
+            offset = offset,
+            initialVelocity = initialVelocity,
+        ) {
+            if (notifyCallbackByOffset()) {
+                delay(500)
+            }
+            _internalOffset = boundsOffset(_isChecked)
         }
     }
 
     private fun animateToOffset(
         offset: Float,
         initialVelocity: Float? = null,
+        onFinish: (suspend () -> Unit)? = null,
     ) {
         _scope.launch {
             _animOffset.snapTo(_internalOffset)
@@ -244,19 +261,25 @@ private class FSwitchState(
                 targetValue = offset,
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
-
-            if (notifyCallbackByOffset()) {
-                delay(500)
-            }
-            updateOffsetIfIdle()
+            onFinish?.invoke()
         }.also {
             _animJob = it
         }
     }
 
-    private fun updateOffsetIfIdle() {
-        if (isReady && !_animOffset.isRunning) {
+    private fun updateOffsetByState() {
+        if (!isReady) return
+
+        if (_isFirst) {
+            _isFirst = false
             _internalOffset = boundsOffset(_isChecked)
+            return
+        }
+
+        val offset = boundsOffset(_isChecked)
+        if (_animOffset.targetValue != offset) {
+            _animJob?.cancel()
+            animateToOffset(offset)
         }
     }
 
