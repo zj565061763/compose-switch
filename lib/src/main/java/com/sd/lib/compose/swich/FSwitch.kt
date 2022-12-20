@@ -246,7 +246,6 @@ private class FSwitchState(
             if (notifyCallbackByOffset()) {
                 delay(500)
             }
-            _internalOffset = boundsOffset(_isChecked)
         }
     }
 
@@ -262,6 +261,7 @@ private class FSwitchState(
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
             onFinish?.invoke()
+            updateOffsetByStateStatic()
         }.also {
             _animJob = it
         }
@@ -272,7 +272,7 @@ private class FSwitchState(
 
         if (_isFirst) {
             _isFirst = false
-            _internalOffset = boundsOffset(_isChecked)
+            updateOffsetByStateStatic()
             return
         }
 
@@ -281,6 +281,10 @@ private class FSwitchState(
             _animJob?.cancel()
         }
         animateToOffset(offset)
+    }
+
+    private fun updateOffsetByStateStatic() {
+        _internalOffset = boundsOffset(_isChecked)
     }
 
     private fun boundsOffset(isChecked: Boolean): Float {
