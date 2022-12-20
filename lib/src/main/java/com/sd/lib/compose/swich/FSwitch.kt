@@ -259,7 +259,7 @@ private class FSwitchState(
             _animOffset.snapTo(_internalOffset)
             _animOffset.animateTo(
                 targetValue = offset,
-                animationSpec = tween(durationMillis = 200),
+                animationSpec = tween(durationMillis = 100),
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
             onFinish?.invoke()
