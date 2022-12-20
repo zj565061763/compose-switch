@@ -22,6 +22,7 @@ import kotlin.math.roundToInt
 @Composable
 fun FSwitch(
     checked: Boolean,
+    interactiveMode: Boolean = false,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
@@ -34,13 +35,14 @@ fun FSwitch(
     val coroutineScope = rememberCoroutineScope()
     val state = remember { FSwitchState(checked, coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
+        it.setInteractiveMode(interactiveMode)
         it.setBoxSize(boxSize.width.toFloat())
         it.setThumbSize(thumbSize.width.toFloat())
         it.HandleComposable(checked)
     }
 
 
-    var hasMove by remember { mutableStateOf(false) }
+    var hasDrag by remember { mutableStateOf(false) }
 
     Box(modifier = modifier
         .width(50.dp)
@@ -51,20 +53,20 @@ fun FSwitch(
                 fPointerChange(
                     onStart = {
                         enableVelocity = true
-                        hasMove = false
+                        hasDrag = false
                     },
                     onMove = { input ->
                         if (!input.isConsumed && pointerCount == 1) {
                             val change = input.positionChange()
                             if (state.handleDrag(change.x)) {
                                 input.consume()
-                                hasMove = true
+                                hasDrag = true
                             }
                         }
                     },
                     onUp = { input ->
                         if (pointerCount == 1) {
-                            if (hasMove) {
+                            if (hasDrag) {
                                 val velocity = getPointerVelocity(input.id).x
                                 state.handleFling(velocity)
                             } else {
@@ -112,6 +114,7 @@ private class FSwitchState(
     private val _scope = scope
     var onCheckedChange: ((Boolean) -> Unit)? = null
 
+    private var _interactiveMode = false
     private var _boxSize: Float by mutableStateOf(0f)
     private var _thumbSize: Float by mutableStateOf(0f)
     val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
@@ -145,6 +148,10 @@ private class FSwitchState(
                 updateProgress()
             }
         }
+
+    fun setInteractiveMode(interactive: Boolean) {
+        _interactiveMode = interactive
+    }
 
     fun setBoxSize(size: Float) {
         _boxSize = size
@@ -194,6 +201,7 @@ private class FSwitchState(
     }
 
     fun handleDrag(delta: Float): Boolean {
+        if (!_interactiveMode) return false
         if (_checkedOffset == _uncheckedOffset) return false
         if (_animJob?.isActive == true) return false
 
@@ -218,8 +226,12 @@ private class FSwitchState(
         if (_checkedOffset == _uncheckedOffset) return
         if (_animJob?.isActive == true) return
 
-        val offset = boundsOffset(!_isChecked)
-        animateToOffset(offset)
+        if (_interactiveMode) {
+            val offset = boundsOffset(!_isChecked)
+            animateToOffset(offset)
+        } else {
+            onCheckedChange?.invoke(!_isChecked)
+        }
     }
 
     private fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
