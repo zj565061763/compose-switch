@@ -2,6 +2,7 @@ package com.sd.lib.compose.swich
 
 import android.util.Log
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -258,6 +259,7 @@ private class FSwitchState(
             _animOffset.snapTo(_internalOffset)
             _animOffset.animateTo(
                 targetValue = offset,
+                animationSpec = tween(durationMillis = 200),
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
             onFinish?.invoke()
