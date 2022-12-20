@@ -234,7 +234,10 @@ private class FSwitchState(
         }
     }
 
-    private fun animateToOffset(offset: Float, initialVelocity: Float? = null) {
+    private fun animateToOffset(
+        offset: Float,
+        initialVelocity: Float? = null,
+    ) {
         _scope.launch {
             _animOffset.snapTo(_internalOffset)
             _animOffset.animateTo(
@@ -242,7 +245,7 @@ private class FSwitchState(
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
             ) { _internalOffset = value }
 
-            if (notifyCallback()) {
+            if (notifyCallbackByOffset()) {
                 delay(500)
             }
             updateOffsetByState()
@@ -261,7 +264,7 @@ private class FSwitchState(
         return if (isChecked) _checkedOffset else _uncheckedOffset
     }
 
-    private fun notifyCallback(): Boolean {
+    private fun notifyCallbackByOffset(): Boolean {
         if (_checkedOffset == _uncheckedOffset) return false
         val checked = _internalOffset == _checkedOffset
         if (checked == _isChecked) return false
