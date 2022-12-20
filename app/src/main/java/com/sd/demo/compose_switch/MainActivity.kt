@@ -54,8 +54,8 @@ fun Content() {
 
 @Composable
 private fun SampleDefault() {
-    var checked by remember { mutableStateOf(false) }
-    FSwitch(checked) {
+    var checked by remember { mutableStateOf(true) }
+    FSwitch(checked, interactiveMode = true) {
         logMsg { "onCheckedChange: $it" }
         checked = it
     }
@@ -66,6 +66,7 @@ private fun SampleCustom1() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
+        interactiveMode = true,
         background = {
             FSwitchBackground(
                 progress = it,
@@ -87,6 +88,7 @@ private fun SampleCustom2() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
+        interactiveMode = true,
         background = {
             FSwitchBackground(
                 modifier = Modifier.fillMaxHeight(it.coerceAtLeast(0.2f)),
