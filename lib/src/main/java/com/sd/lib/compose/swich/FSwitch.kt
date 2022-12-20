@@ -277,10 +277,10 @@ private class FSwitchState(
         }
 
         val offset = boundsOffset(_isChecked)
-        if (_animOffset.targetValue != offset) {
+        if (_animOffset.isRunning && _animOffset.targetValue != offset) {
             _animJob?.cancel()
-            animateToOffset(offset)
         }
+        animateToOffset(offset)
     }
 
     private fun boundsOffset(isChecked: Boolean): Float {
