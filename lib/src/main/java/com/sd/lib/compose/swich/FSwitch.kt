@@ -196,7 +196,7 @@ private class FSwitchState(
             _uncheckedOffset,
             _checkedOffset,
         ) {
-            updateOffsetByState()
+            updateOffsetIfIdle()
         }
     }
 
@@ -248,13 +248,13 @@ private class FSwitchState(
             if (notifyCallbackByOffset()) {
                 delay(500)
             }
-            updateOffsetByState()
+            updateOffsetIfIdle()
         }.also {
             _animJob = it
         }
     }
 
-    private fun updateOffsetByState() {
+    private fun updateOffsetIfIdle() {
         if (isReady && !_animOffset.isRunning) {
             _internalOffset = boundsOffset(_isChecked)
         }
