@@ -6,7 +6,7 @@ plugins {
 
 def libGroupId = "com.sd.lib.android"
 def libArtifactId = "compose-switch"
-def libVersionName = "1.0.0-beta02"
+def libVersionName = "1.0.0-beta03"
 
 android {
     namespace = "com.sd.lib.compose.swich"
