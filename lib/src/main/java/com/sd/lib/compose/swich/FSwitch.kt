@@ -45,6 +45,7 @@ fun FSwitch(
 
 
     var hasDrag by remember { mutableStateOf(false) }
+    var hasMove by remember { mutableStateOf(false) }
 
     Box(modifier = modifier
         .width(50.dp)
@@ -56,9 +57,11 @@ fun FSwitch(
                     onStart = {
                         enableVelocity = true
                         hasDrag = false
+                        hasMove = false
                     },
                     onMove = { input ->
                         if (!input.isConsumed && pointerCount == 1) {
+                            hasMove = true
                             val change = input.positionChange()
                             if (state.handleDrag(change.x)) {
                                 input.consume()
@@ -72,7 +75,7 @@ fun FSwitch(
                                 val velocity = getPointerVelocity(input.id).x
                                 state.handleFling(velocity)
                             } else {
-                                if (!input.isConsumed && maxPointerCount == 1) {
+                                if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
                                     val clickTime = input.uptimeMillis - input.previousUptimeMillis
                                     if (clickTime < 200) {
                                         state.handleClick()
