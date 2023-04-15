@@ -77,12 +77,16 @@ private fun Switch(
     val state = remember { SwitchState(coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (isHorizontal) {
-            it.setBoxSize(boxSize.width.toFloat())
-            it.setThumbSize(thumbSize.width.toFloat())
-        } else {
-            it.setBoxSize(boxSize.height.toFloat())
-            it.setThumbSize(thumbSize.height.toFloat())
+        if (boxSize.width > 0 && boxSize.height > 0 &&
+            thumbSize.width > 0 && thumbSize.height > 0
+        ) {
+            if (isHorizontal) {
+                it.setBoxSize(boxSize.width.toFloat())
+                it.setThumbSize(thumbSize.width.toFloat())
+            } else {
+                it.setBoxSize(boxSize.height.toFloat())
+                it.setThumbSize(thumbSize.height.toFloat())
+            }
         }
         it.HandleComposable(checked)
     }
