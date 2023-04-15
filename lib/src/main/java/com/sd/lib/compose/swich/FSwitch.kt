@@ -33,6 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
 
 @Composable
 fun FSwitch(
@@ -200,13 +201,11 @@ private class SwitchState(
     private val _uncheckedOffset = 0f
     private var _checkedOffset = 0f
 
-    private var _isChecked = checked
-        set(value) {
-            if (field != value) {
-                field = value
-                _animJob?.cancel()
-            }
+    private var _isChecked by Delegates.observable(checked) { _, oldValue, newValue ->
+        if (oldValue != newValue) {
+            _animJob?.cancel()
         }
+    }
 
     private val _animOffset = Animatable(boundsOffset(checked))
     private var _animJob: Job? = null
