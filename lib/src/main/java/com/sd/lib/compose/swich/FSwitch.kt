@@ -90,52 +90,55 @@ private fun Switch(
     var hasMove by remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.let {
-            if (isHorizontal) {
-                it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
-            } else {
-                it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
+        modifier = modifier
+            .let {
+                if (isHorizontal) {
+                    it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
+                } else {
+                    it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
+                }
             }
-        }.onSizeChanged { boxSize = it }.run {
-            if (state.isReady && enabled) {
-                fPointerChange(
-                    onStart = {
-                        this.enableVelocity = true
-                        this.calculatePan = true
-                        hasDrag = false
-                        hasMove = false
-                    },
-                    onCalculate = {
-                        if (currentEvent?.fHasConsumed() == false) {
-                            hasMove = true
-                            val change = if (isHorizontal) this.pan.x else this.pan.y
-                            if (state.handleDrag(change)) {
-                                currentEvent?.fConsume()
-                                hasDrag = true
-                            }
-                        }
-                    },
-                    onUp = { input ->
-                        if (pointerCount == 1) {
-                            if (hasDrag) {
-                                getPointerVelocity(input.id)?.let {
-                                    state.handleFling(if (isHorizontal) it.x else it.y)
+            .onSizeChanged { boxSize = it }
+            .let {
+                if (state.isReady && enabled) {
+                    it.fPointerChange(
+                        onStart = {
+                            this.enableVelocity = true
+                            this.calculatePan = true
+                            hasDrag = false
+                            hasMove = false
+                        },
+                        onCalculate = {
+                            if (currentEvent?.fHasConsumed() == false) {
+                                hasMove = true
+                                val change = if (isHorizontal) this.pan.x else this.pan.y
+                                if (state.handleDrag(change)) {
+                                    currentEvent?.fConsume()
+                                    hasDrag = true
                                 }
-                            } else {
-                                if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
-                                    val clickTime = input.uptimeMillis - input.previousUptimeMillis
-                                    if (clickTime < 200) {
-                                        state.handleClick()
+                            }
+                        },
+                        onUp = { input ->
+                            if (pointerCount == 1) {
+                                if (hasDrag) {
+                                    getPointerVelocity(input.id)?.let {
+                                        state.handleFling(if (isHorizontal) it.x else it.y)
+                                    }
+                                } else {
+                                    if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
+                                        val clickTime = input.uptimeMillis - input.previousUptimeMillis
+                                        if (clickTime < 200) {
+                                            state.handleClick()
+                                        }
                                     }
                                 }
                             }
-                        }
-                    },
-                )
-            } else {
-                this
+                        },
+                    )
+                } else {
+                    it
+                }
             }
-        }
     ) {
         // Background
         Box(
