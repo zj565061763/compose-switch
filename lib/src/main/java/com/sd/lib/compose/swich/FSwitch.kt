@@ -74,7 +74,7 @@ private fun Switch(
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
 
-    val state = remember { SwitchState(checked, coroutineScope) }.also {
+    val state = remember { SwitchState(coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
         if (isHorizontal) {
@@ -181,10 +181,7 @@ private fun Switch(
     }
 }
 
-private class SwitchState(
-    checked: Boolean,
-    scope: CoroutineScope,
-) {
+private class SwitchState(scope: CoroutineScope) {
     private val _scope = scope
 
     lateinit var onCheckedChange: (Boolean) -> Unit
@@ -198,19 +195,19 @@ private class SwitchState(
     private val _uncheckedOffset = 0f
     private var _checkedOffset = 0f
 
-    private var _isChecked by Delegates.observable(checked) { _, oldValue, newValue ->
+    private var _isChecked by Delegates.observable(false) { _, oldValue, newValue ->
         if (oldValue != newValue) {
             _animJob?.cancel()
         }
     }
 
-    private val _animOffset = Animatable(boundsOffset(checked))
+    private val _animOffset = Animatable(0f)
     private var _animJob: Job? = null
 
     var progress: Float by mutableStateOf(0f)
         private set
 
-    var currentOffset: Float by mutableStateOf(boundsOffset(checked))
+    var currentOffset: Float by mutableStateOf(0f)
         private set
 
     private var _internalOffset: Float = currentOffset
