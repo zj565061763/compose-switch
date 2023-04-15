@@ -46,7 +46,7 @@ fun FSwitch(
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
 
     val coroutineScope = rememberCoroutineScope()
-    val state = remember { FSwitchState(checked, coroutineScope) }.also {
+    val state = remember { SwitchState(checked, coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.setInteractiveMode(interactiveMode)
         it.setBoxSize(boxSize.width.toFloat())
@@ -127,7 +127,7 @@ fun FSwitch(
     }
 }
 
-private class FSwitchState(
+private class SwitchState(
     checked: Boolean,
     scope: CoroutineScope,
 ) {
