@@ -102,7 +102,7 @@ private fun Switch(
                 boxSize = it
             }
             .let {
-                if (state.isReady && enabled) {
+                if (enabled && state.isReady) {
                     it.fPointerChange(
                         onStart = {
                             this.enableVelocity = true
