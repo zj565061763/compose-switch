@@ -162,7 +162,7 @@ private fun Switch(
                     }
                 }
                 .graphicsLayer {
-                    this.alpha = if (state.isFirst) 0f else 1f
+                    this.alpha = if (state.isReady) 1f else 0f
                 }
                 .onSizeChanged {
                     thumbSize = it
@@ -194,9 +194,6 @@ private class SwitchState(
     private var _thumbSize: Float by mutableStateOf(0f)
 
     val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
-
-    var isFirst: Boolean by mutableStateOf(true)
-        private set
 
     private val _uncheckedOffset = 0f
     private var _checkedOffset = 0f
@@ -344,12 +341,6 @@ private class SwitchState(
 
     private fun updateOffsetByState() {
         if (!isReady) return
-
-        if (isFirst) {
-            updateOffsetByStateStatic()
-            isFirst = false
-            return
-        }
 
         val offset = boundsOffset(_isChecked)
         if (_animOffset.isRunning && _animOffset.targetValue != offset) {
