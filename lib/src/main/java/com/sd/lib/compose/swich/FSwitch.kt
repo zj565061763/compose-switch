@@ -216,7 +216,7 @@ private class SwitchState(
     var currentOffset: Float by mutableStateOf(boundsOffset(checked))
         private set
 
-    private var _internalOffset = currentOffset
+    private var _internalOffset: Float = currentOffset
         set(value) {
             val newValue = value.coerceIn(_uncheckedOffset, _checkedOffset)
             if (field != newValue) {
