@@ -332,7 +332,9 @@ private class SwitchState(
                 targetValue = offset,
                 animationSpec = tween(durationMillis = 150),
                 initialVelocity = initialVelocity ?: _animOffset.velocity,
-            ) { _internalOffset = value }
+            ) {
+                _internalOffset = value
+            }
             onFinish?.invoke()
             updateOffsetByStateStatic()
         }.also {
