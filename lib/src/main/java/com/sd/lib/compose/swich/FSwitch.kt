@@ -66,7 +66,8 @@ fun FSwitch(
             if (state.isReady && enabled) {
                 fPointerChange(
                     onStart = {
-                        enableVelocity = true
+                        this.enableVelocity = true
+                        this.calculatePan = true
                         hasDrag = false
                         hasMove = false
                     },
