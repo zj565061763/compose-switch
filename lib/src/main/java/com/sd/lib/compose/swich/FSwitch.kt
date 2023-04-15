@@ -294,13 +294,16 @@ private class SwitchState(
 
     fun handleClick() {
         if (_animJob?.isActive == true) return
-        if (_checkedOffset == _uncheckedOffset) return
+        if (_checkedOffset == _uncheckedOffset) {
+            onCheckedChange(!_isChecked)
+            return
+        }
 
         if (interactiveMode) {
             val offset = boundsOffset(!_isChecked)
             animateToOffsetInteractive(offset)
         } else {
-            onCheckedChange.invoke(!_isChecked)
+            onCheckedChange(!_isChecked)
         }
     }
 
@@ -312,8 +315,12 @@ private class SwitchState(
             offset = offset,
             initialVelocity = initialVelocity,
         ) {
-            if (notifyCallbackByOffset()) {
-                delay(500)
+            if (_checkedOffset != _uncheckedOffset) {
+                val checked = _internalOffset == _checkedOffset
+                if (checked != _isChecked) {
+                    onCheckedChange(checked)
+                    delay(500)
+                }
             }
         }
     }
@@ -355,14 +362,6 @@ private class SwitchState(
 
     private fun boundsOffset(isChecked: Boolean): Float {
         return if (isChecked) _checkedOffset else _uncheckedOffset
-    }
-
-    private fun notifyCallbackByOffset(): Boolean {
-        if (_checkedOffset == _uncheckedOffset) return false
-        val checked = _internalOffset == _checkedOffset
-        if (checked == _isChecked) return false
-        onCheckedChange(checked)
-        return true
     }
 }
 
