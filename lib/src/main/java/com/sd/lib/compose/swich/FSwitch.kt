@@ -98,7 +98,9 @@ private fun Switch(
                     it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
                 }
             }
-            .onSizeChanged { boxSize = it }
+            .onSizeChanged {
+                boxSize = it
+            }
             .let {
                 if (state.isReady && enabled) {
                     it.fPointerChange(
