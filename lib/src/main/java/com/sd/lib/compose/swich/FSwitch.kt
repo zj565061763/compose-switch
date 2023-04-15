@@ -3,8 +3,19 @@ package com.sd.lib.compose.swich
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -29,7 +40,7 @@ fun FSwitch(
     modifier: Modifier = Modifier,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
-    onCheckedChange: ((Boolean) -> Unit)?,
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     var boxSize by remember { mutableStateOf(IntSize.Zero) }
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
@@ -72,8 +83,9 @@ fun FSwitch(
                     onUp = { input ->
                         if (pointerCount == 1) {
                             if (hasDrag) {
-                                val velocity = getPointerVelocity(input.id).x
-                                state.handleFling(velocity)
+                                getPointerVelocity(input.id)?.let {
+                                    state.handleFling(it.x)
+                                }
                             } else {
                                 if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
                                     val clickTime = input.uptimeMillis - input.previousUptimeMillis
@@ -120,7 +132,7 @@ private class FSwitchState(
     scope: CoroutineScope,
 ) {
     private val _scope = scope
-    var onCheckedChange: ((Boolean) -> Unit)? = null
+    lateinit var onCheckedChange: (Boolean) -> Unit
 
     private var _interactiveMode = false
 
@@ -242,7 +254,7 @@ private class FSwitchState(
             val offset = boundsOffset(!_isChecked)
             animateToOffsetInteractive(offset)
         } else {
-            onCheckedChange?.invoke(!_isChecked)
+            onCheckedChange.invoke(!_isChecked)
         }
     }
 
@@ -307,8 +319,7 @@ private class FSwitchState(
         if (_checkedOffset == _uncheckedOffset) return false
         val checked = _internalOffset == _checkedOffset
         if (checked == _isChecked) return false
-        val callback = onCheckedChange ?: return false
-        callback(checked)
+        onCheckedChange(checked)
         return true
     }
 }
