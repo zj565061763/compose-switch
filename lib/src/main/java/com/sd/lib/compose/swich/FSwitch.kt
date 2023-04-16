@@ -77,9 +77,7 @@ private fun Switch(
     val state = remember { SwitchState(coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (boxSize.width > 0 && boxSize.height > 0 &&
-            thumbSize.width > 0 && thumbSize.height > 0
-        ) {
+        if (boxSize.width > 0 && boxSize.height > 0 && thumbSize.width > 0 && thumbSize.height > 0) {
             if (isHorizontal) {
                 it.setBoxSize(boxSize.width.toFloat())
                 it.setThumbSize(thumbSize.width.toFloat())
@@ -94,59 +92,54 @@ private fun Switch(
     var hasDrag by remember { mutableStateOf(false) }
     var hasMove by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier
-            .let {
-                if (isHorizontal) {
-                    it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
-                } else {
-                    it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
-                }
-            }
-            .onSizeChanged {
-                boxSize = it
-            }
-            .let {
-                if (enabled && state.isReady) {
-                    it.fPointerChange(
-                        onStart = {
-                            this.enableVelocity = true
-                            this.calculatePan = true
-                            hasDrag = false
-                            hasMove = false
-                        },
-                        onCalculate = {
-                            if (currentEvent?.fHasConsumed() == false) {
-                                hasMove = true
-                                val change = if (isHorizontal) this.pan.x else this.pan.y
-                                if (state.handleDrag(change)) {
-                                    currentEvent?.fConsume()
-                                    hasDrag = true
+    Box(modifier = modifier.let {
+        if (isHorizontal) {
+            it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
+        } else {
+            it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
+        }
+    }.onSizeChanged {
+        boxSize = it
+    }.let {
+        if (enabled && state.isReady) {
+            it.fPointerChange(
+                onStart = {
+                    this.enableVelocity = true
+                    this.calculatePan = true
+                    hasDrag = false
+                    hasMove = false
+                },
+                onCalculate = {
+                    if (currentEvent?.fHasConsumed() == false) {
+                        hasMove = true
+                        val change = if (isHorizontal) this.pan.x else this.pan.y
+                        if (state.handleDrag(change)) {
+                            currentEvent?.fConsume()
+                            hasDrag = true
+                        }
+                    }
+                },
+                onUp = { input ->
+                    if (pointerCount == 1) {
+                        if (hasDrag) {
+                            getPointerVelocity(input.id)?.let {
+                                state.handleFling(if (isHorizontal) it.x else it.y)
+                            }
+                        } else {
+                            if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
+                                val clickTime = input.uptimeMillis - input.previousUptimeMillis
+                                if (clickTime < 200) {
+                                    state.handleClick()
                                 }
                             }
-                        },
-                        onUp = { input ->
-                            if (pointerCount == 1) {
-                                if (hasDrag) {
-                                    getPointerVelocity(input.id)?.let {
-                                        state.handleFling(if (isHorizontal) it.x else it.y)
-                                    }
-                                } else {
-                                    if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
-                                        val clickTime = input.uptimeMillis - input.previousUptimeMillis
-                                        if (clickTime < 200) {
-                                            state.handleClick()
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                    )
-                } else {
-                    it
-                }
-            }
-    ) {
+                        }
+                    }
+                },
+            )
+        } else {
+            it
+        }
+    }) {
         // Background
         Box(
             modifier = Modifier.matchParentSize(),
@@ -166,7 +159,7 @@ private fun Switch(
                     }
                 }
                 .graphicsLayer {
-                    this.alpha = if (state.isReady) 1f else 0f
+                    this.alpha = if (state.hasInitialized) 1f else 0f
                 }
                 .onSizeChanged {
                     thumbSize = it
@@ -193,6 +186,9 @@ private class SwitchState(scope: CoroutineScope) {
 
     private var _boxSize: Float by mutableStateOf(0f)
     private var _thumbSize: Float by mutableStateOf(0f)
+
+    var hasInitialized: Boolean by mutableStateOf(false)
+        private set
 
     val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
 
@@ -267,7 +263,19 @@ private class SwitchState(scope: CoroutineScope) {
             _uncheckedOffset,
             _checkedOffset,
         ) {
-            updateOffsetByState()
+            if (!isReady) return@LaunchedEffect
+
+            if (!hasInitialized) {
+                updateOffsetByStateStatic()
+                hasInitialized = true
+                return@LaunchedEffect
+            }
+
+            val offset = boundsOffset(_isChecked)
+            if (_animOffset.isRunning && _animOffset.targetValue != offset) {
+                _animJob?.cancel()
+            }
+            animateToOffset(offset)
         }
     }
 
@@ -345,16 +353,6 @@ private class SwitchState(scope: CoroutineScope) {
         }.also {
             _animJob = it
         }
-    }
-
-    private fun updateOffsetByState() {
-        if (!isReady) return
-
-        val offset = boundsOffset(_isChecked)
-        if (_animOffset.isRunning && _animOffset.targetValue != offset) {
-            _animJob?.cancel()
-        }
-        animateToOffset(offset)
     }
 
     private fun updateOffsetByStateStatic() {
