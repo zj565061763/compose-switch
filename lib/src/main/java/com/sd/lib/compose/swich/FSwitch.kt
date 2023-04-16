@@ -77,13 +77,15 @@ private fun Switch(
     val state = remember { SwitchState(coroutineScope) }.also {
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (boxSize.width > 0 && boxSize.height > 0 && thumbSize.width > 0 && thumbSize.height > 0) {
+        if (boxSize.width > 0 && boxSize.height > 0 &&
+            thumbSize.width > 0 && thumbSize.height > 0
+        ) {
             if (isHorizontal) {
-                it.setBoxSize(boxSize.width.toFloat())
-                it.setThumbSize(thumbSize.width.toFloat())
+                it.boxSize = boxSize.width.toFloat()
+                it.thumbSize = thumbSize.width.toFloat()
             } else {
-                it.setBoxSize(boxSize.height.toFloat())
-                it.setThumbSize(thumbSize.height.toFloat())
+                it.boxSize = boxSize.height.toFloat()
+                it.thumbSize = thumbSize.height.toFloat()
             }
         }
         it.HandleComposable(checked)
@@ -184,16 +186,18 @@ private class SwitchState(scope: CoroutineScope) {
     lateinit var onCheckedChange: (Boolean) -> Unit
     var interactiveMode = false
 
-    private var _boxSize: Float by mutableStateOf(0f)
-    private var _thumbSize: Float by mutableStateOf(0f)
+    var boxSize: Float by mutableStateOf(0f)
+    var thumbSize: Float by mutableStateOf(0f)
+    val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
+
+    private val _uncheckedOffset: Float by mutableStateOf(0f)
+    private val _checkedOffset: Float by derivedStateOf {
+        val delta = (boxSize - thumbSize).coerceAtLeast(0f)
+        _uncheckedOffset + delta
+    }
 
     var hasInitialized: Boolean by mutableStateOf(false)
         private set
-
-    val isReady: Boolean by derivedStateOf { _boxSize > 0 && _thumbSize > 0 }
-
-    private val _uncheckedOffset = 0f
-    private var _checkedOffset = 0f
 
     private var _isChecked by Delegates.observable(false) { _, oldValue, newValue ->
         if (oldValue != newValue) {
@@ -219,21 +223,6 @@ private class SwitchState(scope: CoroutineScope) {
                 updateProgress()
             }
         }
-
-    fun setBoxSize(size: Float) {
-        _boxSize = size
-        updateCheckedOffset()
-    }
-
-    fun setThumbSize(size: Float) {
-        _thumbSize = size
-        updateCheckedOffset()
-    }
-
-    private fun updateCheckedOffset() {
-        val delta = (_boxSize - _thumbSize).coerceAtLeast(0f)
-        _checkedOffset = _uncheckedOffset + delta
-    }
 
     private fun updateProgress() {
         val checkedOffset = _checkedOffset
