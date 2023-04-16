@@ -248,7 +248,7 @@ private class SwitchState(scope: CoroutineScope) {
         _isChecked = checked
         LaunchedEffect(
             isReady,
-            _isChecked,
+            checked,
             _uncheckedOffset,
             _checkedOffset,
         ) {
