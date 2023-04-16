@@ -122,8 +122,8 @@ private fun Switch(
                 onUp = { input ->
                     if (pointerCount == 1) {
                         if (hasDrag) {
-                            getPointerVelocity(input.id)?.let {
-                                state.handleFling(if (isHorizontal) it.x else it.y)
+                            getPointerVelocity(input.id)?.let { velocity ->
+                                state.handleFling(if (isHorizontal) velocity.x else velocity.y)
                             }
                         } else {
                             if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
