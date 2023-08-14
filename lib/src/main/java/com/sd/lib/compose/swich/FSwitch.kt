@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fHasConsumed
-import com.sd.lib.compose.gesture.fPointerChange
+import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -103,7 +103,7 @@ private fun Switch(
         boxSize = it
     }.let {
         if (enabled && state.isReady) {
-            it.fPointerChange(
+            it.fPointer(
                 onStart = {
                     this.enableVelocity = true
                     this.calculatePan = true
@@ -111,11 +111,11 @@ private fun Switch(
                     hasMove = false
                 },
                 onCalculate = {
-                    if (currentEvent?.fHasConsumed() == false) {
+                    if (!currentEvent.fHasConsumed()) {
                         hasMove = true
                         val change = if (isHorizontal) this.pan.x else this.pan.y
                         if (state.handleDrag(change)) {
-                            currentEvent?.fConsume()
+                            currentEvent.fConsume()
                             hasDrag = true
                         }
                     }
