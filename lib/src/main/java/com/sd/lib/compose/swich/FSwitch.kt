@@ -1,5 +1,6 @@
 package com.sd.lib.compose.swich
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
+@SuppressLint("ModifierParameter")
 @Composable
 fun FSwitch(
     checked: Boolean,
@@ -185,11 +188,11 @@ private class SwitchState(scope: CoroutineScope) {
     lateinit var onCheckedChange: (Boolean) -> Unit
     var interactiveMode = false
 
-    var boxSize: Float by mutableStateOf(0f)
-    var thumbSize: Float by mutableStateOf(0f)
+    var boxSize: Float by mutableFloatStateOf(0f)
+    var thumbSize: Float by mutableFloatStateOf(0f)
     val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
 
-    private val _uncheckedOffset: Float by mutableStateOf(0f)
+    private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
     private val _checkedOffset: Float by derivedStateOf {
         val delta = (boxSize - thumbSize).coerceAtLeast(0f)
         _uncheckedOffset + delta
@@ -202,10 +205,10 @@ private class SwitchState(scope: CoroutineScope) {
     private val _animOffset = Animatable(0f)
     private var _animJob: Job? = null
 
-    var progress: Float by mutableStateOf(0f)
+    var progress: Float by mutableFloatStateOf(0f)
         private set
 
-    var currentOffset: Float by mutableStateOf(0f)
+    var currentOffset: Float by mutableFloatStateOf(0f)
         private set
 
     private var _internalOffset: Float = currentOffset
