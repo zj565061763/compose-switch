@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun FSwitchBackground(
     progress: Float,
     modifier: Modifier = Modifier,
-    colorUnchecked: Color = Color(0xFFE3E3E3),
+    colorUnchecked: Color = MaterialTheme.colorScheme.onSurface.copy(0.15f),
     colorChecked: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = RoundedCornerShape(50)
 ) {
@@ -36,7 +36,7 @@ fun FSwitchBackground(
 @Composable
 fun FSwitchThumb(
     modifier: Modifier = Modifier,
-    color: Color = Color.White,
+    color: Color = MaterialTheme.colorScheme.surface,
     paddings: PaddingValues = PaddingValues(2.dp),
     shape: Shape = RoundedCornerShape(50)
 ) {
