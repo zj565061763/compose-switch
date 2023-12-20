@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -114,7 +115,7 @@ private fun SampleCustom2() {
                     .aspectRatio(1f, true)
                     .padding(start = 0.dp, end = 2.dp, top = 2.dp, bottom = 2.dp),
                 shape = RoundedCornerShape(5.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 border = BorderStroke(Dp.Hairline, Color(0xFFE3E3E3))
             ) {}
         },
