@@ -67,7 +67,7 @@ private fun SampleDefault() {
     var checked by remember { mutableStateOf(true) }
     FSwitch(
         checked = checked,
-        interactiveMode = true,
+        draggable = true,
     ) {
         logMsg { "onCheckedChange: $it" }
         checked = it
@@ -79,7 +79,7 @@ private fun SampleCustom1() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
-        interactiveMode = true,
+        draggable = true,
         background = {
             FSwitchBackground(
                 progress = it,
@@ -101,7 +101,7 @@ private fun SampleCustom2() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
-        interactiveMode = true,
+        draggable = true,
         background = {
             FSwitchBackground(
                 modifier = Modifier.fillMaxHeight(it.coerceAtLeast(0.2f)),

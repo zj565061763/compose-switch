@@ -29,7 +29,7 @@ fun FSwitch(
     modifier: Modifier = Modifier,
     checked: Boolean,
     state: FSwitchState = rememberFSwitchState(),
-    interactiveMode: Boolean = false,
+    draggable: Boolean = false,
     enabled: Boolean = true,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
@@ -40,7 +40,7 @@ fun FSwitch(
         checked = checked,
         state = state,
         isHorizontal = true,
-        interactiveMode = interactiveMode,
+        draggable = draggable,
         enabled = enabled,
         background = background,
         thumb = thumb,
@@ -54,7 +54,7 @@ private fun Switch(
     checked: Boolean,
     state: FSwitchState,
     isHorizontal: Boolean,
-    interactiveMode: Boolean,
+    draggable: Boolean,
     enabled: Boolean,
     background: @Composable (progress: Float) -> Unit,
     thumb: @Composable (progress: Float) -> Unit,
@@ -66,7 +66,7 @@ private fun Switch(
     state.let {
         it.isEnabled = enabled
         it.onCheckedChange = onCheckedChange
-        it.interactiveMode = interactiveMode
+        it.draggable = draggable
         if (isHorizontal) {
             it.setSize(boxSizeState.value.width, thumbSizeState.value.width)
         } else {

@@ -45,7 +45,7 @@ class FSwitchState(scope: CoroutineScope) {
         private set
 
     internal lateinit var onCheckedChange: (Boolean) -> Unit
-    internal var interactiveMode = false
+    internal var draggable = false
 
     private var _isChecked = false
     private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
@@ -106,7 +106,7 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleDrag(delta: Float): Boolean {
-        if (!interactiveMode) return false
+        if (!draggable) return false
         if (_animJob?.isActive == true) return false
         if (_checkedOffset == _uncheckedOffset) return false
 
@@ -116,7 +116,7 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleFling(velocity: Float) {
-        if (!interactiveMode) return
+        if (!draggable) return
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) return
 
