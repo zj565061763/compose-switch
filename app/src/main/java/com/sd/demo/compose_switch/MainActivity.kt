@@ -80,9 +80,9 @@ private fun SampleCustom1() {
     FSwitch(
         checked = checked,
         draggable = true,
-        background = {
+        background = { state ->
             FSwitchBackground(
-                progress = it,
+                progress = state.progress,
                 colorChecked = Color.Red,
                 shape = RoundedCornerShape(5.dp),
             )
@@ -102,10 +102,10 @@ private fun SampleCustom2() {
     FSwitch(
         checked = checked,
         draggable = true,
-        background = {
+        background = { state ->
             FSwitchBackground(
-                modifier = Modifier.fillMaxHeight(it.coerceAtLeast(0.2f)),
-                progress = it,
+                modifier = Modifier.fillMaxHeight(state.progress.coerceAtLeast(0.2f)),
+                progress = state.progress,
                 shape = RoundedCornerShape(5.dp)
             )
         },

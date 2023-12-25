@@ -31,8 +31,8 @@ fun FSwitch(
     state: FSwitchState = rememberFSwitchState(),
     draggable: Boolean = false,
     enabled: Boolean = true,
-    background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
-    thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
+    background: @Composable (FSwitchState) -> Unit = { FSwitchBackground(progress = it.progress) },
+    thumb: @Composable (FSwitchState) -> Unit = { FSwitchThumb() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Switch(
@@ -56,8 +56,8 @@ private fun Switch(
     isHorizontal: Boolean,
     draggable: Boolean,
     enabled: Boolean,
-    background: @Composable (progress: Float) -> Unit,
-    thumb: @Composable (progress: Float) -> Unit,
+    background: @Composable (FSwitchState) -> Unit,
+    thumb: @Composable (FSwitchState) -> Unit,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val boxSizeState = remember { mutableStateOf(IntSize.Zero) }
@@ -133,18 +133,16 @@ private fun Switch(
         // Background
         BackgroundBox(
             modifier = Modifier.matchParentSize(),
-            progress = state.progress,
+            state = state,
             background = background,
         )
 
         // Thumb
         ThumbBox(
+            state = state,
             isHorizontal = isHorizontal,
-            hasInitialized = state.hasInitialized,
             boxSizeState = boxSizeState,
             thumbSizeState = thumbSizeState,
-            thumbOffset = state.thumbOffset,
-            progress = state.progress,
             thumb = thumb,
         )
     }
@@ -153,27 +151,25 @@ private fun Switch(
 @Composable
 private fun BackgroundBox(
     modifier: Modifier = Modifier,
-    progress: Float,
-    background: @Composable (progress: Float) -> Unit,
+    state: FSwitchState,
+    background: @Composable (FSwitchState) -> Unit,
 ) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        background(progress)
+        background(state)
     }
 }
 
 @Composable
 private fun ThumbBox(
     modifier: Modifier = Modifier,
+    state: FSwitchState,
     isHorizontal: Boolean,
-    hasInitialized: Boolean,
     boxSizeState: State<IntSize>,
     thumbSizeState: MutableState<IntSize>,
-    thumbOffset: Int,
-    progress: Float,
-    thumb: @Composable (progress: Float) -> Unit,
+    thumb: @Composable (FSwitchState) -> Unit,
 ) {
     val density = LocalDensity.current
     Box(
@@ -188,20 +184,20 @@ private fun ThumbBox(
                 }
             }
             .graphicsLayer {
-                this.alpha = if (hasInitialized) 1f else 0f
+                this.alpha = if (state.hasInitialized) 1f else 0f
             }
             .onSizeChanged {
                 thumbSizeState.value = it
             }
             .offset {
                 if (isHorizontal) {
-                    IntOffset(thumbOffset, 0)
+                    IntOffset(state.thumbOffset, 0)
                 } else {
-                    IntOffset(0, thumbOffset)
+                    IntOffset(0, state.thumbOffset)
                 }
             },
         contentAlignment = Alignment.Center,
     ) {
-        thumb(progress)
+        thumb(state)
     }
 }
