@@ -124,31 +124,10 @@ class FSwitchState(scope: CoroutineScope) {
         } else {
             boundsValue(_internalOffset, _uncheckedOffset, _checkedOffset)
         }
-        animateToOffsetInteractive(offset, velocity)
-    }
 
-    internal fun handleClick() {
-        if (_animJob?.isActive == true) return
-        if (_checkedOffset == _uncheckedOffset) {
-            notifyCallback(!_isChecked)
-            return
-        }
-
-        if (interactiveMode) {
-            val offset = boundsOffset(!_isChecked)
-            animateToOffsetInteractive(offset)
-        } else {
-            notifyCallback(!_isChecked)
-        }
-    }
-
-    private fun animateToOffsetInteractive(
-        offset: Float,
-        initialVelocity: Float? = null,
-    ) {
         animateToOffset(
             offset = offset,
-            initialVelocity = initialVelocity,
+            initialVelocity = velocity,
         ) {
             if (_checkedOffset != _uncheckedOffset) {
                 val checked = _internalOffset == _checkedOffset
@@ -158,6 +137,11 @@ class FSwitchState(scope: CoroutineScope) {
                 }
             }
         }
+    }
+
+    internal fun handleClick() {
+        if (_animJob?.isActive == true) return
+        notifyCallback(!_isChecked)
     }
 
     private fun animateToOffset(
