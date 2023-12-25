@@ -91,6 +91,7 @@ class FSwitchState(scope: CoroutineScope) {
         _isChecked = checked
         LaunchedEffect(checked, _uncheckedOffset, _checkedOffset) {
             if (_uncheckedOffset == _checkedOffset) {
+                progress = 0f
                 return@LaunchedEffect
             }
 
