@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,19 +39,19 @@ class FSwitchState(scope: CoroutineScope) {
         private set
 
     /** Thumb的偏移量 */
-    var thumbOffset: Float by mutableFloatStateOf(0f)
+    var thumbOffset: Int by mutableIntStateOf(0)
         private set
 
     internal lateinit var onCheckedChange: (Boolean) -> Unit
     internal var interactiveMode = false
 
-    internal var boxSize: Float by mutableFloatStateOf(0f)
-    internal var thumbSize: Float by mutableFloatStateOf(0f)
+    internal var boxSize: Int by mutableIntStateOf(0)
+    internal var thumbSize: Int by mutableIntStateOf(0)
     internal val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
 
     private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
     private val _checkedOffset: Float by derivedStateOf {
-        val delta = (boxSize - thumbSize).coerceAtLeast(0f)
+        val delta = (boxSize - thumbSize).coerceAtLeast(0)
         _uncheckedOffset + delta
     }
 
@@ -61,32 +62,30 @@ class FSwitchState(scope: CoroutineScope) {
     private val _animOffset = Animatable(0f)
     private var _animJob: Job? = null
 
-    private var _internalOffset: Float = thumbOffset
+    private var _internalOffset: Float = 0f
         set(value) {
             val newValue = value.coerceIn(_uncheckedOffset, _checkedOffset)
             if (field != newValue) {
                 field = newValue
-                thumbOffset = newValue
-                updateProgress()
+                thumbOffset = newValue.toInt()
+                progress = calculateProgress()
             }
         }
 
-    private fun updateProgress() {
+    private fun calculateProgress(): Float {
         val checkedOffset = _checkedOffset
         val uncheckedOffset = _uncheckedOffset
-        progress = if (checkedOffset > uncheckedOffset) {
-            val currentOffset = thumbOffset
-            when {
-                currentOffset <= uncheckedOffset -> 0f
-                currentOffset >= checkedOffset -> 1f
-                else -> {
-                    val total = checkedOffset - uncheckedOffset
-                    val current = currentOffset - uncheckedOffset
-                    (current / total).coerceIn(0f, 1f)
-                }
+        if (checkedOffset <= uncheckedOffset) return 0f
+
+        val offset = thumbOffset
+        return when {
+            offset <= uncheckedOffset -> 0f
+            offset >= checkedOffset -> 1f
+            else -> {
+                val current = offset - uncheckedOffset
+                val total = checkedOffset - uncheckedOffset
+                (current / total).coerceIn(0f, 1f)
             }
-        } else {
-            0f
         }
     }
 

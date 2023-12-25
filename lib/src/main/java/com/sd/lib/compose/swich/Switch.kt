@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fHasConsumed
 import com.sd.lib.compose.gesture.fPointer
-import kotlin.math.roundToInt
 
 @Composable
 fun FSwitch(
@@ -68,14 +67,12 @@ private fun Switch(
         it.isEnabled = enabled
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (boxSizeState.value.hasSize() && thumbSizeState.value.hasSize()) {
-            if (isHorizontal) {
-                it.boxSize = boxSizeState.value.width.toFloat()
-                it.thumbSize = thumbSizeState.value.width.toFloat()
-            } else {
-                it.boxSize = boxSizeState.value.height.toFloat()
-                it.thumbSize = thumbSizeState.value.height.toFloat()
-            }
+        if (isHorizontal) {
+            it.boxSize = boxSizeState.value.width
+            it.thumbSize = thumbSizeState.value.width
+        } else {
+            it.boxSize = boxSizeState.value.height
+            it.thumbSize = thumbSizeState.value.height
         }
         it.HandleComposable(checked)
     }
@@ -176,7 +173,7 @@ private fun ThumbBox(
     hasInitialized: Boolean,
     boxSizeState: State<IntSize>,
     thumbSizeState: MutableState<IntSize>,
-    thumbOffset: Float,
+    thumbOffset: Int,
     progress: Float,
     thumb: @Composable (progress: Float) -> Unit,
 ) {
@@ -200,17 +197,13 @@ private fun ThumbBox(
             }
             .offset {
                 if (isHorizontal) {
-                    IntOffset(thumbOffset.roundToInt(), 0)
+                    IntOffset(thumbOffset, 0)
                 } else {
-                    IntOffset(0, thumbOffset.roundToInt())
+                    IntOffset(0, thumbOffset)
                 }
             },
         contentAlignment = Alignment.Center,
     ) {
         thumb(progress)
     }
-}
-
-private fun IntSize.hasSize(): Boolean {
-    return this.width > 0 && this.height > 0
 }
