@@ -97,11 +97,10 @@ class FSwitchState(scope: CoroutineScope) {
             if (!hasInitialized) {
                 updateOffsetByStateStatic()
                 hasInitialized = true
-                return@LaunchedEffect
+            } else {
+                val offset = boundsOffset(_isChecked)
+                animateToOffset(offset)
             }
-
-            val offset = boundsOffset(_isChecked)
-            animateToOffset(offset)
         }
     }
 
