@@ -43,7 +43,6 @@ class FSwitchState(scope: CoroutineScope) {
         private set
 
     internal val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
-
     internal var hasInitialized: Boolean by mutableStateOf(false)
         private set
 
