@@ -1,6 +1,5 @@
 package com.sd.lib.compose.swich
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
@@ -24,7 +23,6 @@ import com.sd.lib.compose.gesture.fHasConsumed
 import com.sd.lib.compose.gesture.fPointer
 import kotlin.math.roundToInt
 
-@SuppressLint("ModifierParameter")
 @Composable
 fun FSwitch(
     modifier: Modifier = Modifier,
