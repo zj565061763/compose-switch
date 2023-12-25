@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,20 +27,22 @@ import kotlin.math.roundToInt
 @SuppressLint("ModifierParameter")
 @Composable
 fun FSwitch(
+    modifier: Modifier = Modifier,
     checked: Boolean,
+    state: FSwitchState = rememberFSwitchState(),
     interactiveMode: Boolean = false,
     enabled: Boolean = true,
-    modifier: Modifier = Modifier,
     background: @Composable (progress: Float) -> Unit = { FSwitchBackground(progress = it) },
     thumb: @Composable (progress: Float) -> Unit = { FSwitchThumb() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Switch(
+        modifier = modifier,
         checked = checked,
+        state = state,
         isHorizontal = true,
         interactiveMode = interactiveMode,
         enabled = enabled,
-        modifier = modifier,
         background = background,
         thumb = thumb,
         onCheckedChange = onCheckedChange,
@@ -50,11 +51,12 @@ fun FSwitch(
 
 @Composable
 private fun Switch(
+    modifier: Modifier,
     checked: Boolean,
+    state: FSwitchState,
     isHorizontal: Boolean,
     interactiveMode: Boolean,
     enabled: Boolean,
-    modifier: Modifier,
     background: @Composable (progress: Float) -> Unit,
     thumb: @Composable (progress: Float) -> Unit,
     onCheckedChange: (Boolean) -> Unit,
@@ -63,14 +65,12 @@ private fun Switch(
     var thumbSize by remember { mutableStateOf(IntSize.Zero) }
 
     val density = LocalDensity.current
-    val coroutineScope = rememberCoroutineScope()
 
-    val state = remember { FSwitchState(coroutineScope) }.also {
+    state.let {
+        it.isEnabled = enabled
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (boxSize.width > 0 && boxSize.height > 0 &&
-            thumbSize.width > 0 && thumbSize.height > 0
-        ) {
+        if (boxSize.hasSize() && thumbSize.hasSize()) {
             if (isHorizontal) {
                 it.boxSize = boxSize.width.toFloat()
                 it.thumbSize = thumbSize.width.toFloat()
@@ -162,9 +162,9 @@ private fun Switch(
                 }
                 .offset {
                     if (isHorizontal) {
-                        IntOffset(state.currentOffset.roundToInt(), 0)
+                        IntOffset(state.thumbOffset.roundToInt(), 0)
                     } else {
-                        IntOffset(0, state.currentOffset.roundToInt())
+                        IntOffset(0, state.thumbOffset.roundToInt())
                     }
                 },
             contentAlignment = Alignment.Center,
@@ -172,4 +172,8 @@ private fun Switch(
             thumb(state.progress)
         }
     }
+}
+
+private fun IntSize.hasSize(): Boolean {
+    return this.width > 0 && this.height > 0
 }
