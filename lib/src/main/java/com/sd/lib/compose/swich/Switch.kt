@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,22 +61,20 @@ private fun Switch(
     thumb: @Composable (progress: Float) -> Unit,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    var boxSize by remember { mutableStateOf(IntSize.Zero) }
-    var thumbSize by remember { mutableStateOf(IntSize.Zero) }
-
-    val density = LocalDensity.current
+    val boxSizeState = remember { mutableStateOf(IntSize.Zero) }
+    val thumbSizeState = remember { mutableStateOf(IntSize.Zero) }
 
     state.let {
         it.isEnabled = enabled
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
-        if (boxSize.hasSize() && thumbSize.hasSize()) {
+        if (boxSizeState.value.hasSize() && thumbSizeState.value.hasSize()) {
             if (isHorizontal) {
-                it.boxSize = boxSize.width.toFloat()
-                it.thumbSize = thumbSize.width.toFloat()
+                it.boxSize = boxSizeState.value.width.toFloat()
+                it.thumbSize = thumbSizeState.value.width.toFloat()
             } else {
-                it.boxSize = boxSize.height.toFloat()
-                it.thumbSize = thumbSize.height.toFloat()
+                it.boxSize = boxSizeState.value.height.toFloat()
+                it.thumbSize = thumbSizeState.value.height.toFloat()
             }
         }
         it.HandleComposable(checked)
@@ -92,7 +92,7 @@ private fun Switch(
             }
         }
         .onSizeChanged {
-            boxSize = it
+            boxSizeState.value = it
         }
         .let {
             if (enabled && state.isReady) {
@@ -134,41 +134,80 @@ private fun Switch(
                 it
             }
         }) {
+
         // Background
-        Box(
+        BackgroundBox(
             modifier = Modifier.matchParentSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            background(state.progress)
-        }
+            progress = state.progress,
+            background = background,
+        )
 
         // Thumb
-        Box(
-            modifier = Modifier
-                .let {
-                    if (isHorizontal) {
-                        it.height(with(density) { boxSize.height.toDp() })
-                    } else {
-                        it.width(with(density) { boxSize.width.toDp() })
-                    }
+        ThumbBox(
+            isHorizontal = isHorizontal,
+            hasInitialized = state.hasInitialized,
+            boxSizeState = boxSizeState,
+            thumbSizeState = thumbSizeState,
+            thumbOffset = state.thumbOffset,
+            progress = state.progress,
+            thumb = thumb,
+        )
+    }
+}
+
+@Composable
+private fun BackgroundBox(
+    modifier: Modifier = Modifier,
+    progress: Float,
+    background: @Composable (progress: Float) -> Unit,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        background(progress)
+    }
+}
+
+@Composable
+private fun ThumbBox(
+    modifier: Modifier = Modifier,
+    isHorizontal: Boolean,
+    hasInitialized: Boolean,
+    boxSizeState: State<IntSize>,
+    thumbSizeState: MutableState<IntSize>,
+    thumbOffset: Float,
+    progress: Float,
+    thumb: @Composable (progress: Float) -> Unit,
+) {
+    val density = LocalDensity.current
+    Box(
+        modifier = modifier
+            .let {
+                if (isHorizontal) {
+                    val height = with(density) { boxSizeState.value.height.toDp() }
+                    it.height(height)
+                } else {
+                    val width = with(density) { boxSizeState.value.width.toDp() }
+                    it.width(width)
                 }
-                .graphicsLayer {
-                    this.alpha = if (state.hasInitialized) 1f else 0f
+            }
+            .graphicsLayer {
+                this.alpha = if (hasInitialized) 1f else 0f
+            }
+            .onSizeChanged {
+                thumbSizeState.value = it
+            }
+            .offset {
+                if (isHorizontal) {
+                    IntOffset(thumbOffset.roundToInt(), 0)
+                } else {
+                    IntOffset(0, thumbOffset.roundToInt())
                 }
-                .onSizeChanged {
-                    thumbSize = it
-                }
-                .offset {
-                    if (isHorizontal) {
-                        IntOffset(state.thumbOffset.roundToInt(), 0)
-                    } else {
-                        IntOffset(0, state.thumbOffset.roundToInt())
-                    }
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            thumb(state.progress)
-        }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        thumb(progress)
     }
 }
 
