@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FSwitchBackground(
-    progress: Float,
     modifier: Modifier = Modifier,
+    progress: Float,
     colorUnchecked: Color = MaterialTheme.colorScheme.onSurface.copy(0.15f),
     colorChecked: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = RoundedCornerShape(50)
