@@ -68,11 +68,9 @@ private fun Switch(
         it.onCheckedChange = onCheckedChange
         it.interactiveMode = interactiveMode
         if (isHorizontal) {
-            it.boxSize = boxSizeState.value.width
-            it.thumbSize = thumbSizeState.value.width
+            it.setSize(boxSizeState.value.width, thumbSizeState.value.width)
         } else {
-            it.boxSize = boxSizeState.value.height
-            it.thumbSize = thumbSizeState.value.height
+            it.setSize(boxSizeState.value.height, thumbSizeState.value.height)
         }
         it.HandleComposable(checked)
     }
@@ -92,7 +90,7 @@ private fun Switch(
             boxSizeState.value = it
         }
         .let {
-            if (enabled && state.isReady) {
+            if (enabled) {
                 it.fPointer(
                     onStart = {
                         this.enableVelocity = true

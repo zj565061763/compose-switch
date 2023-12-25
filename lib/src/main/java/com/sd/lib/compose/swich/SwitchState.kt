@@ -5,7 +5,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -42,22 +41,15 @@ class FSwitchState(scope: CoroutineScope) {
     var thumbOffset: Int by mutableIntStateOf(0)
         private set
 
-    internal val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
     internal var hasInitialized: Boolean by mutableStateOf(false)
         private set
 
     internal lateinit var onCheckedChange: (Boolean) -> Unit
     internal var interactiveMode = false
-    internal var boxSize: Int by mutableIntStateOf(0)
-    internal var thumbSize: Int by mutableIntStateOf(0)
 
     private var _isChecked = false
-
     private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
-    private val _checkedOffset: Float by derivedStateOf {
-        val delta = (boxSize - thumbSize).coerceAtLeast(0)
-        _uncheckedOffset + delta
-    }
+    private var _checkedOffset: Float by mutableFloatStateOf(0f)
 
     private val _animOffset = Animatable(0f)
     private var _animJob: Job? = null
@@ -89,11 +81,18 @@ class FSwitchState(scope: CoroutineScope) {
         }
     }
 
+    internal fun setSize(boxSize: Int, thumbSize: Int) {
+        val delta = boxSize - thumbSize
+        _checkedOffset = _uncheckedOffset + delta.coerceAtLeast(0)
+    }
+
     @Composable
     internal fun HandleComposable(checked: Boolean) {
         _isChecked = checked
-        LaunchedEffect(checked, isReady, hasInitialized) {
-            if (!isReady) return@LaunchedEffect
+        LaunchedEffect(checked, _uncheckedOffset, _checkedOffset) {
+            if (_uncheckedOffset == _checkedOffset) {
+                return@LaunchedEffect
+            }
 
             if (!hasInitialized) {
                 updateOffsetByStateStatic()
@@ -107,7 +106,6 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleDrag(delta: Float): Boolean {
-        if (!isReady) return false
         if (!interactiveMode) return false
         if (_animJob?.isActive == true) return false
         if (_checkedOffset == _uncheckedOffset) return false
@@ -118,7 +116,6 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleFling(velocity: Float) {
-        if (!isReady) return
         if (!interactiveMode) return
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) return
@@ -132,7 +129,6 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleClick() {
-        if (!isReady) return
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) {
             onCheckedChange(!_isChecked)
