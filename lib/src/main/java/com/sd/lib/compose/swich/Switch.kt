@@ -1,6 +1,5 @@
 package com.sd.lib.compose.swich
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
@@ -34,7 +33,6 @@ fun FSwitch(
     enabled: Boolean = true,
     background: @Composable (FSwitchState) -> Unit = { FSwitchBackground(progress = it.progress) },
     thumb: @Composable (FSwitchState) -> Unit = { FSwitchThumb() },
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Switch(
@@ -46,7 +44,6 @@ fun FSwitch(
         enabled = enabled,
         background = background,
         thumb = thumb,
-        interactionSource = interactionSource,
         onCheckedChange = onCheckedChange,
     )
 }
@@ -61,7 +58,6 @@ private fun Switch(
     enabled: Boolean,
     background: @Composable (FSwitchState) -> Unit,
     thumb: @Composable (FSwitchState) -> Unit,
-    interactionSource: MutableInteractionSource,
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val boxSizeState = remember { mutableStateOf(IntSize.Zero) }
