@@ -41,12 +41,12 @@ class FSwitchState(scope: CoroutineScope) {
     var thumbOffset: Float by mutableFloatStateOf(0f)
         private set
 
-    lateinit var onCheckedChange: (Boolean) -> Unit
-    var interactiveMode = false
+    internal lateinit var onCheckedChange: (Boolean) -> Unit
+    internal var interactiveMode = false
 
-    var boxSize: Float by mutableFloatStateOf(0f)
-    var thumbSize: Float by mutableFloatStateOf(0f)
-    val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
+    internal var boxSize: Float by mutableFloatStateOf(0f)
+    internal var thumbSize: Float by mutableFloatStateOf(0f)
+    internal val isReady: Boolean by derivedStateOf { boxSize > 0 && thumbSize > 0 }
 
     private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
     private val _checkedOffset: Float by derivedStateOf {
@@ -55,7 +55,7 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     private var _isChecked: Boolean by mutableStateOf(false)
-    var hasInitialized: Boolean by mutableStateOf(false)
+    internal var hasInitialized: Boolean by mutableStateOf(false)
         private set
 
     private val _animOffset = Animatable(0f)
@@ -91,7 +91,7 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     @Composable
-    fun HandleComposable(checked: Boolean) {
+    internal fun HandleComposable(checked: Boolean) {
         _isChecked = checked
         LaunchedEffect(
             isReady,
@@ -112,7 +112,7 @@ class FSwitchState(scope: CoroutineScope) {
         }
     }
 
-    fun handleDrag(delta: Float): Boolean {
+    internal fun handleDrag(delta: Float): Boolean {
         if (!interactiveMode) return false
         if (_animJob?.isActive == true) return false
         if (_checkedOffset == _uncheckedOffset) return false
@@ -122,7 +122,7 @@ class FSwitchState(scope: CoroutineScope) {
         return _internalOffset != oldOffset
     }
 
-    fun handleFling(velocity: Float) {
+    internal fun handleFling(velocity: Float) {
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) return
 
@@ -134,7 +134,7 @@ class FSwitchState(scope: CoroutineScope) {
         animateToOffsetInteractive(offset, velocity)
     }
 
-    fun handleClick() {
+    internal fun handleClick() {
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) {
             onCheckedChange(!_isChecked)
