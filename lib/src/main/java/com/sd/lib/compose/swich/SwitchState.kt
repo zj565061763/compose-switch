@@ -38,7 +38,7 @@ class FSwitchState(scope: CoroutineScope) {
         private set
 
     /** Thumb的偏移量 */
-    var thumbOffset: Int by mutableIntStateOf(0)
+    internal var thumbOffset: Int by mutableIntStateOf(0)
         private set
 
     internal var hasInitialized: Boolean by mutableStateOf(false)
