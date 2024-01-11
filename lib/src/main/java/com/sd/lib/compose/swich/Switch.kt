@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -26,7 +27,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fConsume
-import com.sd.lib.compose.gesture.fHasConsumed
 import com.sd.lib.compose.gesture.fPointer
 
 @Composable
@@ -98,29 +98,33 @@ private fun Switch(
             this.role = Role.Switch
             this.toggleableState = ToggleableState(checked)
         }
-        .let {
+        .let { m ->
             if (enabled) {
-                it.fPointer(
+                m.fPointer(
                     onStart = {
-                        this.enableVelocity = true
                         this.calculatePan = true
                         hasDrag = false
                         hasMove = false
                     },
                     onCalculate = {
-                        if (!currentEvent.fHasConsumed()) {
+                        if (currentEvent.changes.any { it.positionChanged() }) {
                             hasMove = true
                             val change = if (isHorizontal) this.pan.x else this.pan.y
                             if (state.handleDrag(change)) {
-                                currentEvent.fConsume()
+                                currentEvent.fConsume { it.positionChanged() }
                                 hasDrag = true
                             }
+                        }
+                    },
+                    onMove = {
+                        if (hasDrag) {
+                            velocityAdd(it)
                         }
                     },
                     onUp = { input ->
                         if (pointerCount == 1) {
                             if (hasDrag) {
-                                getPointerVelocity(input.id)?.let { velocity ->
+                                velocityGet(input.id)?.let { velocity ->
                                     state.handleFling(if (isHorizontal) velocity.x else velocity.y)
                                 }
                             } else {
@@ -135,7 +139,7 @@ private fun Switch(
                     },
                 )
             } else {
-                it
+                m
             }
         }) {
 
