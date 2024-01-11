@@ -150,6 +150,7 @@ class FSwitchState(scope: CoroutineScope) {
         initialVelocity: Float? = null,
         onFinish: (suspend () -> Unit)? = null,
     ) {
+        _animJob?.cancel()
         _scope.launch {
             _animOffset.snapTo(_internalOffset)
             _animOffset.animateTo(
