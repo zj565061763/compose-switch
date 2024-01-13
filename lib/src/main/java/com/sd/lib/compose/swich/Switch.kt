@@ -177,12 +177,9 @@ private fun Modifier.handleDrag(
             hasDrag = false
         },
         onCalculate = {
-            if (!hasDrag) {
-                val positionChanged = currentEvent.changes.any { it.positionChanged() }
-                if (!positionChanged) {
-                    cancelPointer()
-                    return@fPointer
-                }
+            if (!currentEvent.changes.any { it.positionChanged() }) {
+                cancelPointer()
+                return@fPointer
             }
 
             val change = if (isHorizontal) this.pan.x else this.pan.y
@@ -201,11 +198,20 @@ private fun Modifier.handleDrag(
         },
         onUp = { input ->
             if (pointerCount == 1) {
+                if (input.isConsumed) {
+                    cancelPointer()
+                    return@fPointer
+                }
                 if (hasDrag) {
                     velocityGet(input.id)?.let { velocity ->
                         state.handleFling(if (isHorizontal) velocity.x else velocity.y)
                     }
                 }
+            }
+        },
+        onFinish = {
+            if (isCanceled) {
+                state.handleDragCanceled()
             }
         },
     )

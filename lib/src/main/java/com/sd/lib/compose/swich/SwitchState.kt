@@ -143,6 +143,10 @@ class FSwitchState(scope: CoroutineScope) {
         }
     }
 
+    internal fun handleDragCanceled() {
+        updateOffsetByStateStatic()
+    }
+
     internal fun handleClick() {
         if (_animJob?.isActive == true) return
         notifyCallback(!_isChecked)
