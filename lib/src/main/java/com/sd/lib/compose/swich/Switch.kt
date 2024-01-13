@@ -1,5 +1,7 @@
 package com.sd.lib.compose.swich
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.onSizeChanged
@@ -81,10 +84,17 @@ private fun Switch(
         this.HandleComposable(checked)
     }
 
-    var hasDrag by remember { mutableStateOf(false) }
-    var hasMove by remember { mutableStateOf(false) }
-
     Box(modifier = modifier
+        .let { m ->
+            if (enabled) {
+                m.handleGesture(
+                    state = state,
+                    isHorizontal = isHorizontal,
+                )
+            } else {
+                m
+            }
+        }
         .let {
             if (isHorizontal) {
                 it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
@@ -99,50 +109,7 @@ private fun Switch(
             this.role = Role.Switch
             this.toggleableState = ToggleableState(checked)
         }
-        .let { m ->
-            if (enabled) {
-                m.fPointer(
-                    onStart = {
-                        this.calculatePan = true
-                        hasDrag = false
-                        hasMove = false
-                    },
-                    onCalculate = {
-                        if (currentEvent.changes.any { it.positionChanged() }) {
-                            hasMove = true
-                            val change = if (isHorizontal) this.pan.x else this.pan.y
-                            if (state.handleDrag(change)) {
-                                currentEvent.fConsume { it.positionChanged() }
-                                hasDrag = true
-                            }
-                        }
-                    },
-                    onMove = {
-                        if (hasDrag) {
-                            velocityAdd(it)
-                        }
-                    },
-                    onUp = { input ->
-                        if (pointerCount == 1) {
-                            if (hasDrag) {
-                                velocityGet(input.id)?.let { velocity ->
-                                    state.handleFling(if (isHorizontal) velocity.x else velocity.y)
-                                }
-                            } else {
-                                if (!input.isConsumed && maxPointerCount == 1 && !hasMove) {
-                                    val clickTime = input.uptimeMillis - input.previousUptimeMillis
-                                    if (clickTime < 200) {
-                                        state.handleClick()
-                                    }
-                                }
-                            }
-                        }
-                    },
-                )
-            } else {
-                m
-            }
-        }) {
+    ) {
 
         // Background
         BackgroundBox(
@@ -160,6 +127,50 @@ private fun Switch(
             thumb = thumb,
         )
     }
+}
+
+private fun Modifier.handleGesture(
+    state: FSwitchState,
+    isHorizontal: Boolean,
+): Modifier = composed {
+
+    var hasDrag by remember { mutableStateOf(false) }
+    clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null,
+        role = Role.Switch,
+        onClick = {
+            state.handleClick()
+        },
+    ).fPointer(
+        onStart = {
+            this.calculatePan = true
+            hasDrag = false
+        },
+        onCalculate = {
+            if (currentEvent.changes.any { it.positionChanged() }) {
+                val change = if (isHorizontal) this.pan.x else this.pan.y
+                if (state.handleDrag(change)) {
+                    currentEvent.fConsume { it.positionChanged() }
+                    hasDrag = true
+                }
+            }
+        },
+        onMove = {
+            if (hasDrag) {
+                velocityAdd(it)
+            }
+        },
+        onUp = { input ->
+            if (pointerCount == 1) {
+                if (hasDrag) {
+                    velocityGet(input.id)?.let { velocity ->
+                        state.handleFling(if (isHorizontal) velocity.x else velocity.y)
+                    }
+                }
+            }
+        },
+    )
 }
 
 @Composable
