@@ -85,9 +85,25 @@ private fun Switch(
     }
 
     Box(modifier = modifier
+        // handle click
         .let { m ->
             if (enabled) {
-                m.handleGesture(
+                m.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    role = Role.Switch,
+                    onClick = {
+                        state.handleClick()
+                    },
+                )
+            } else {
+                m
+            }
+        }
+        // handle drag
+        .let { m ->
+            if (enabled && draggable) {
+                m.handleDrag(
                     state = state,
                     isHorizontal = isHorizontal,
                 )
@@ -128,21 +144,34 @@ private fun Switch(
     }
 }
 
-private fun Modifier.handleGesture(
+private fun Modifier.handleClick(
+    state: FSwitchState,
+    enabled: Boolean,
+): Modifier {
+    return if (enabled) {
+        this.composed {
+            this.clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                role = Role.Switch,
+                onClick = {
+                    state.handleClick()
+                },
+            )
+        }
+    } else {
+        this
+    }
+}
+
+private fun Modifier.handleDrag(
     state: FSwitchState,
     isHorizontal: Boolean,
 ): Modifier = composed {
 
     var hasDrag by remember { mutableStateOf(false) }
 
-    clickable(
-        interactionSource = remember { MutableInteractionSource() },
-        indication = null,
-        role = Role.Switch,
-        onClick = {
-            state.handleClick()
-        },
-    ).fPointer(
+    fPointer(
         onStart = {
             this.calculatePan = true
             hasDrag = false
