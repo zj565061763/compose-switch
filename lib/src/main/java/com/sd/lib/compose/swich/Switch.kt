@@ -95,11 +95,11 @@ private fun Switch(
                 m
             }
         }
-        .let {
+        .let { m ->
             if (isHorizontal) {
-                it.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
+                m.defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
             } else {
-                it.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
+                m.defaultMinSize(minWidth = 25.dp, minHeight = 50.dp)
             }
         }
         .onSizeChanged {
