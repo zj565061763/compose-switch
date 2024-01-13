@@ -6,7 +6,7 @@ plugins {
 
 val libGroupId = "com.sd.lib.android"
 val libArtifactId = "compose-switch"
-val libVersionName = "1.0.0-rc03"
+val libVersionName = "1.0.0-rc04"
 
 android {
     namespace = "com.sd.lib.compose.swich"
