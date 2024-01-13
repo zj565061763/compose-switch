@@ -149,15 +149,15 @@ private fun Modifier.handleDrag(
     isHorizontal: Boolean,
 ): Modifier = composed {
 
-    var isDrag by remember { mutableStateOf(false) }
+    var hasDrag by remember { mutableStateOf(false) }
 
     fPointer(
         onStart = {
             this.calculatePan = true
-            isDrag = false
+            hasDrag = false
         },
         onCalculate = {
-            if (!isDrag) {
+            if (!hasDrag) {
                 val positionChanged = currentEvent.changes.any { it.positionChanged() }
                 if (!positionChanged) {
                     cancelPointer()
@@ -167,21 +167,21 @@ private fun Modifier.handleDrag(
 
             val change = if (isHorizontal) this.pan.x else this.pan.y
             if (state.handleDrag(change)) {
-                isDrag = true
+                hasDrag = true
             }
 
-            if (isDrag) {
+            if (hasDrag) {
                 currentEvent.fConsume { it.positionChanged() }
             }
         },
         onMove = {
-            if (isDrag) {
+            if (hasDrag) {
                 velocityAdd(it)
             }
         },
         onUp = { input ->
             if (pointerCount == 1) {
-                if (isDrag) {
+                if (hasDrag) {
                     velocityGet(input.id)?.let { velocity ->
                         state.handleFling(if (isHorizontal) velocity.x else velocity.y)
                     }
