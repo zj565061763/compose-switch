@@ -66,7 +66,7 @@ fun Content() {
 
 @Composable
 private fun SampleDefault() {
-    var checked by remember { mutableStateOf(true) }
+    var checked by remember { mutableStateOf(false) }
     FSwitch(checked = checked) {
         logMsg { "onCheckedChange: $it" }
         checked = it
