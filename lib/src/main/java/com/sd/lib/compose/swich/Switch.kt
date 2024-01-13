@@ -68,16 +68,17 @@ private fun Switch(
     val boxSizeState = remember { mutableStateOf(IntSize.Zero) }
     val thumbSizeState = remember { mutableStateOf(IntSize.Zero) }
 
-    state.let {
-        it.isEnabled = enabled
-        it.onCheckedChange = onCheckedChange
-        it.draggable = draggable
+    state.apply {
+        this.isEnabled = enabled
+        this.onCheckedChange = onCheckedChange
+        this.draggable = draggable
+        this.density = LocalDensity.current
         if (isHorizontal) {
-            it.setSize(boxSizeState.value.width, thumbSizeState.value.width)
+            this.setSize(boxSizeState.value.width, thumbSizeState.value.width)
         } else {
-            it.setSize(boxSizeState.value.height, thumbSizeState.value.height)
+            this.setSize(boxSizeState.value.height, thumbSizeState.value.height)
         }
-        it.HandleComposable(checked)
+        this.HandleComposable(checked)
     }
 
     var hasDrag by remember { mutableStateOf(false) }

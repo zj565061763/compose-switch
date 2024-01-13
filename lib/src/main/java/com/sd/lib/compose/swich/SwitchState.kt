@@ -1,7 +1,9 @@
 package com.sd.lib.compose.swich
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,11 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.absoluteValue
 
 @Composable
 fun rememberFSwitchState(): FSwitchState {
@@ -45,6 +47,7 @@ class FSwitchState(scope: CoroutineScope) {
 
     internal lateinit var onCheckedChange: (Boolean) -> Unit
     internal var draggable = false
+    internal lateinit var density: Density
 
     private var _isChecked = false
     private val _uncheckedOffset: Float by mutableFloatStateOf(0f)
@@ -119,11 +122,12 @@ class FSwitchState(scope: CoroutineScope) {
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) return
 
-        val offset = if (velocity.absoluteValue > 1000f) {
-            if (velocity > 0) _checkedOffset else _uncheckedOffset
-        } else {
-            boundsValue(_internalOffset, _uncheckedOffset, _checkedOffset)
-        }
+        val decayTarget = splineBasedDecay<Float>(density).calculateTargetValue(
+            initialValue = _internalOffset,
+            initialVelocity = velocity,
+        )
+
+        val offset = boundsValue(decayTarget, _uncheckedOffset, _checkedOffset)
 
         animateToOffset(
             offset = offset,
@@ -180,7 +184,8 @@ class FSwitchState(scope: CoroutineScope) {
 }
 
 private fun boundsValue(value: Float, min: Float, max: Float): Float {
-    require(value in min..max)
+    if (value <= min) return min
+    if (value >= max) return max
     val center = (min + max) / 2
     return if (value > center) max else min
 }
