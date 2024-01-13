@@ -1,7 +1,5 @@
 package com.sd.lib.compose.swich
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
@@ -88,14 +86,7 @@ private fun Switch(
         // handle click
         .let { m ->
             if (enabled) {
-                m.clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    role = Role.Switch,
-                    onClick = {
-                        state.handleClick()
-                    },
-                )
+                m.handleClick(state = state)
             } else {
                 m
             }
@@ -144,10 +135,39 @@ private fun Switch(
     }
 }
 
+private fun Modifier.handleClick(
+    state: FSwitchState,
+): Modifier = this.composed {
+
+    var hasMove by remember { mutableStateOf(false) }
+
+    fPointer(
+        onStart = {
+            hasMove = false
+        },
+        onDown = {
+            if (pointerCount > 1) {
+                cancelPointer()
+            }
+        },
+        onMove = {
+            hasMove = true
+        },
+        onUp = { input ->
+            if (!input.isConsumed && !hasMove) {
+                val clickTime = input.uptimeMillis - input.previousUptimeMillis
+                if (clickTime < 200) {
+                    state.handleClick()
+                }
+            }
+        },
+    )
+}
+
 private fun Modifier.handleDrag(
     state: FSwitchState,
     isHorizontal: Boolean,
-): Modifier = composed {
+): Modifier = this.composed {
 
     var hasDrag by remember { mutableStateOf(false) }
 
