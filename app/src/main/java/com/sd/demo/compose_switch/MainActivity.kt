@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -54,18 +55,22 @@ fun Content() {
             .verticalScroll(state = rememberScrollState())
             .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         SampleDefault()
+        SampleDefault(modifier = Modifier.requiredWidth(200.dp))
         SampleCustom1()
         SampleCustom2()
     }
 }
 
 @Composable
-private fun SampleDefault() {
+private fun SampleDefault(
+    modifier: Modifier = Modifier,
+) {
     var checked by remember { mutableStateOf(true) }
     FSwitch(
+        modifier = modifier,
         checked = checked,
         draggable = true,
     ) {
