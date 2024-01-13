@@ -1,6 +1,5 @@
 package com.sd.lib.compose.swich
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
@@ -184,8 +183,4 @@ private fun boundsValue(value: Float, min: Float, max: Float): Float {
     require(value in min..max)
     val center = (min + max) / 2
     return if (value > center) max else min
-}
-
-internal inline fun logMsg(block: () -> String) {
-    Log.i("FSwitch", block())
 }
