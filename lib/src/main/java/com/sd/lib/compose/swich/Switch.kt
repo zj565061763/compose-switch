@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sd.lib.compose.gesture.fConsume
+import com.sd.lib.compose.gesture.fHasConsumedPositionChange
 import com.sd.lib.compose.gesture.fPointer
 
 @Composable
@@ -182,7 +183,7 @@ private fun Modifier.handleDrag(
             hasDrag = false
         },
         onCalculate = {
-            if (!currentEvent.changes.any { it.positionChanged() }) {
+            if (currentEvent.fHasConsumedPositionChange()) {
                 cancelPointer()
                 return@fPointer
             }
