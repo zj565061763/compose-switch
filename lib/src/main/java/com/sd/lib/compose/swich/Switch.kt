@@ -110,7 +110,6 @@ private fun Switch(
             this.toggleableState = ToggleableState(checked)
         }
     ) {
-
         // Background
         BackgroundBox(
             modifier = Modifier.matchParentSize(),
@@ -135,6 +134,7 @@ private fun Modifier.handleGesture(
 ): Modifier = composed {
 
     var hasDrag by remember { mutableStateOf(false) }
+
     clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null,
