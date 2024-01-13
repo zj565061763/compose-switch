@@ -144,6 +144,7 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleDragCanceled() {
+        _animJob?.cancel()
         updateOffsetByStateStatic()
     }
 
