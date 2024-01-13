@@ -144,26 +144,6 @@ private fun Switch(
     }
 }
 
-private fun Modifier.handleClick(
-    state: FSwitchState,
-    enabled: Boolean,
-): Modifier {
-    return if (enabled) {
-        this.composed {
-            this.clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                role = Role.Switch,
-                onClick = {
-                    state.handleClick()
-                },
-            )
-        }
-    } else {
-        this
-    }
-}
-
 private fun Modifier.handleDrag(
     state: FSwitchState,
     isHorizontal: Boolean,
