@@ -91,7 +91,6 @@ private fun SampleCustom1() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
-        draggable = true,
         background = { state ->
             FSwitchBackground(
                 progress = state.progress,
@@ -113,7 +112,6 @@ private fun SampleCustom2() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(
         checked = checked,
-        draggable = true,
         background = { state ->
             FSwitchBackground(
                 modifier = Modifier.fillMaxHeight(state.progress.coerceAtLeast(0.2f)),
