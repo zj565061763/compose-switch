@@ -172,6 +172,7 @@ private fun Modifier.handleDrag(
     var hasDrag by remember { mutableStateOf(false) }
 
     fPointer(
+        touchSlop = 0f,
         onStart = {
             this.calculatePan = true
             hasDrag = false
