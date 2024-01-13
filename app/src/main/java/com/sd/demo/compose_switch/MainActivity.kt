@@ -58,19 +58,26 @@ fun Content() {
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         SampleDefault()
-        SampleDefault(modifier = Modifier.requiredWidth(200.dp))
+        SampleDraggable()
         SampleCustom1()
         SampleCustom2()
     }
 }
 
 @Composable
-private fun SampleDefault(
-    modifier: Modifier = Modifier,
-) {
+private fun SampleDefault() {
+    var checked by remember { mutableStateOf(true) }
+    FSwitch(checked = checked) {
+        logMsg { "onCheckedChange: $it" }
+        checked = it
+    }
+}
+
+@Composable
+private fun SampleDraggable() {
     var checked by remember { mutableStateOf(true) }
     FSwitch(
-        modifier = modifier,
+        modifier = Modifier.requiredWidth(200.dp),
         checked = checked,
         draggable = true,
     ) {
