@@ -145,8 +145,8 @@ private fun Modifier.handleClick(
         onStart = {
             hasMove = false
         },
-        onDown = {
-            if (pointerCount > 1) {
+        onDown = { input ->
+            if (input.isConsumed || pointerCount > 1) {
                 cancelPointer()
             }
         },
@@ -154,10 +154,14 @@ private fun Modifier.handleClick(
             hasMove = true
         },
         onUp = { input ->
-            if (!input.isConsumed && !hasMove) {
-                val clickTime = input.uptimeMillis - input.previousUptimeMillis
-                if (clickTime < 200) {
-                    state.handleClick()
+            if (input.isConsumed) {
+                cancelPointer()
+            } else {
+                if (!hasMove) {
+                    val clickTime = input.uptimeMillis - input.previousUptimeMillis
+                    if (clickTime < 200) {
+                        state.handleClick()
+                    }
                 }
             }
         },
