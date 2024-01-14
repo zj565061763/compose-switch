@@ -216,7 +216,7 @@ private fun Modifier.handleDrag(
             }
         },
         onFinish = {
-            if (isCanceled) {
+            if (hasDrag && isCanceled) {
                 state.handleDragCanceled()
             }
         },
