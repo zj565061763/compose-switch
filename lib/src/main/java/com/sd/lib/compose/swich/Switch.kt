@@ -129,7 +129,7 @@ private fun Modifier.handleDraggable(
                 state.handleDrag(delta)
             },
             onDragCancel = {
-                state.handleDragCanceled()
+                state.handleDragCancel()
             },
             onDragEnd = {
                 val velocity = velocityTracker.calculateVelocity().x
