@@ -1,6 +1,5 @@
 package com.sd.lib.compose.swich
 
-import android.util.Log
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -131,7 +130,6 @@ private fun Modifier.handleGesture(
                 if (state.handleDrag(delta)) {
                     if (!hasDrag) {
                         hasDrag = true
-                        logMsg { "onDragStart" }
                     }
                 }
                 if (hasDrag) {
@@ -143,21 +141,17 @@ private fun Modifier.handleGesture(
             if (hasDrag) {
                 if (finishOrCancel) {
                     val velocity = velocityTracker.calculateVelocity().x
-                    logMsg { "onDragEnd velocity:$velocity" }
                     state.handleFling(velocity)
                 } else {
-                    logMsg { "onDragCancel" }
                     state.handleDragCancel()
                 }
             }
         }
-    }
-        .pointerInput(state) {
-            detectTapGestures {
-                logMsg { "handleClick" }
-                state.handleClick()
-            }
+    }.pointerInput(state) {
+        detectTapGestures {
+            state.handleClick()
         }
+    }
 }
 
 @Composable
@@ -200,8 +194,4 @@ private fun ThumbBox(
     ) {
         thumb(state)
     }
-}
-
-internal inline fun logMsg(block: () -> String) {
-    Log.i("FSwitch", block())
 }
