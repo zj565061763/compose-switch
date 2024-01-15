@@ -6,7 +6,7 @@ plugins {
 
 val libGroupId = "com.sd.lib.android"
 val libArtifactId = "compose-switch"
-val libVersionName = "1.0.0-rc05"
+val libVersionName = "1.1.0-beta01"
 
 android {
     namespace = "com.sd.lib.compose.swich"
@@ -40,7 +40,6 @@ kotlin {
 dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.sd.composeGesture)
 }
 
 publishing {
