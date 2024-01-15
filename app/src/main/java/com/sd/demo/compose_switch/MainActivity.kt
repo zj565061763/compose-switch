@@ -57,15 +57,15 @@ fun Content() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        SampleDefault()
-        SampleDraggable()
+        SampleDefault1()
+        SampleDefault2()
         SampleCustom1()
         SampleCustom2()
     }
 }
 
 @Composable
-private fun SampleDefault() {
+private fun SampleDefault1() {
     var checked by remember { mutableStateOf(false) }
     FSwitch(checked = checked) {
         logMsg { "onCheckedChange: $it" }
@@ -74,7 +74,7 @@ private fun SampleDefault() {
 }
 
 @Composable
-private fun SampleDraggable() {
+private fun SampleDefault2() {
     var checked by remember { mutableStateOf(true) }
     FSwitch(
         modifier = Modifier.requiredWidth(200.dp),
