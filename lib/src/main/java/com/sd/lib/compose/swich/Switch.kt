@@ -12,10 +12,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -115,15 +113,14 @@ private fun Modifier.handleGesture(
     state: FSwitchState,
 ): Modifier = this.composed {
 
-    var hasDrag by remember { mutableStateOf(false) }
     val velocityTracker = remember { VelocityTracker() }
 
     pointerInput(state) {
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
 
-            // reset
-            hasDrag = false
+            var hasDrag = false
+            velocityTracker.resetTracking()
 
             // finishOrCancel，true表示正常结束，false表示取消
             val finishOrCancel = horizontalDrag(down.id) { input ->
