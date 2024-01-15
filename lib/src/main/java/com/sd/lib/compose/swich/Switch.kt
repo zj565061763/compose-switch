@@ -73,20 +73,12 @@ private fun Switch(
     }
 
     Box(modifier = modifier
-        // handle click
-        .let { m ->
+        .run {
             if (enabled) {
-                m.handleClick(state = state)
+                handleClick(state = state)
+                    .handleDraggable(state = state)
             } else {
-                m
-            }
-        }
-        // handle drag
-        .let { m ->
-            if (enabled) {
-                m.handleDraggable(state = state)
-            } else {
-                m
+                this
             }
         }
         .defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
@@ -126,9 +118,7 @@ private fun Modifier.handleClick(
 private fun Modifier.handleDraggable(
     state: FSwitchState,
 ): Modifier = this.composed {
-
     val velocityTracker = remember { VelocityTracker() }
-
     pointerInput(state) {
         detectHorizontalDragGestures(
             onDragStart = {
