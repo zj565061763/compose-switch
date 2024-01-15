@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.toggleableState
 import androidx.compose.ui.state.ToggleableState
@@ -79,10 +80,7 @@ private fun Switch(
     Box(modifier = modifier
         .run {
             if (enabled) {
-                this.handleGesture(
-                    state = state,
-                    checked = checked,
-                )
+                this.handleGesture(state = state)
             } else {
                 this
             }
@@ -90,6 +88,10 @@ private fun Switch(
         .defaultMinSize(minWidth = 50.dp, minHeight = 25.dp)
         .onSizeChanged {
             boxSizeState.value = it
+        }
+        .semantics {
+            this.role = Role.Switch
+            this.toggleableState = ToggleableState(checked)
         }
     ) {
         // Background
@@ -111,7 +113,6 @@ private fun Switch(
 
 private fun Modifier.handleGesture(
     state: FSwitchState,
-    checked: Boolean,
 ): Modifier = this.composed {
 
     var hasDrag by remember { mutableStateOf(false) }
@@ -151,14 +152,10 @@ private fun Modifier.handleGesture(
         .clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
-            role = Role.Switch,
             onClick = {
                 state.handleClick()
             }
         )
-        .semantics {
-            this.toggleableState = ToggleableState(checked)
-        }
 }
 
 @Composable
