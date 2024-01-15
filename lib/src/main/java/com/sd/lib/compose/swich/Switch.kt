@@ -116,7 +116,6 @@ private fun Modifier.handleGesture(
 ): Modifier = this.composed {
 
     var hasDrag by remember { mutableStateOf(false) }
-    var hasMove by remember { mutableStateOf(false) }
     val velocityTracker = remember { VelocityTracker() }
 
     pointerInput(state) {
@@ -125,11 +124,9 @@ private fun Modifier.handleGesture(
 
             // reset
             hasDrag = false
-            hasMove = false
 
             // finishOrCancel，true表示正常结束，false表示取消
             val finishOrCancel = horizontalDrag(down.id) { input ->
-                hasMove = true
                 val delta = input.positionChange().x
                 if (state.handleDrag(delta)) {
                     if (!hasDrag) {
