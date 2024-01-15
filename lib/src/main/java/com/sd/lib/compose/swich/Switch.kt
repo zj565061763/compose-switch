@@ -125,8 +125,9 @@ private fun Modifier.handleDraggable(
     state: FSwitchState,
 ): Modifier = this.composed {
 
-    val velocityTracker = remember { VelocityTracker() }
     var hasDrag by remember { mutableStateOf(false) }
+    var hasMove by remember { mutableStateOf(false) }
+    val velocityTracker = remember { VelocityTracker() }
 
     pointerInput(state) {
 
@@ -135,8 +136,11 @@ private fun Modifier.handleDraggable(
 
             // reset
             hasDrag = false
+            hasMove = false
 
-            val horizontalDrag = horizontalDrag(down.id) { input ->
+            // finishOrCancel，true表示正常结束，false表示取消
+            val finishOrCancel = horizontalDrag(down.id) { input ->
+                hasMove = true
                 val delta = input.positionChange().x
                 if (state.handleDrag(delta)) {
                     if (!hasDrag) {
@@ -151,7 +155,7 @@ private fun Modifier.handleDraggable(
             }
 
             if (hasDrag) {
-                if (horizontalDrag) {
+                if (finishOrCancel) {
                     val velocity = velocityTracker.calculateVelocity().x
                     logMsg { "onDragEnd velocity:$velocity" }
                     state.handleFling(velocity)
