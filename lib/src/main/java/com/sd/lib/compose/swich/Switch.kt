@@ -130,7 +130,6 @@ private fun Modifier.handleDraggable(
     val velocityTracker = remember { VelocityTracker() }
 
     pointerInput(state) {
-
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
 
