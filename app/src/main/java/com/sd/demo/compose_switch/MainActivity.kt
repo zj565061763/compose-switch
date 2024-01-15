@@ -79,7 +79,6 @@ private fun SampleDraggable() {
     FSwitch(
         modifier = Modifier.requiredWidth(200.dp),
         checked = checked,
-        draggable = true,
     ) {
         logMsg { "onCheckedChange: $it" }
         checked = it

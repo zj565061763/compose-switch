@@ -27,11 +27,11 @@ fun rememberFSwitchState(): FSwitchState {
     }
 }
 
-class FSwitchState(scope: CoroutineScope) {
+class FSwitchState internal constructor(scope: CoroutineScope) {
     private val _scope = scope
 
     /** 是否可用 */
-    var isEnabled: Boolean by mutableStateOf(true)
+    var enabled: Boolean by mutableStateOf(true)
         internal set
 
     /** 当前进度[0-1] */
@@ -46,7 +46,6 @@ class FSwitchState(scope: CoroutineScope) {
         private set
 
     internal lateinit var onCheckedChange: (Boolean) -> Unit
-    internal var draggable = false
     internal lateinit var density: Density
 
     private var _isChecked = false
@@ -108,7 +107,6 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleDrag(delta: Float): Boolean {
-        if (!draggable) return false
         if (_animJob?.isActive == true) return false
         if (_checkedOffset == _uncheckedOffset) return false
 
@@ -118,7 +116,6 @@ class FSwitchState(scope: CoroutineScope) {
     }
 
     internal fun handleFling(velocity: Float) {
-        if (!draggable) return
         if (_animJob?.isActive == true) return
         if (_checkedOffset == _uncheckedOffset) return
 
