@@ -80,8 +80,7 @@ private fun Switch(
     Box(modifier = modifier
         .run {
             if (enabled) {
-                handleClick(state = state)
-                    .handleDraggable(state = state)
+                this.handleGesture(state = state)
             } else {
                 this
             }
@@ -112,16 +111,7 @@ private fun Switch(
     }
 }
 
-private fun Modifier.handleClick(
-    state: FSwitchState,
-): Modifier = this.pointerInput(state) {
-    detectTapGestures {
-        logMsg { "handleClick" }
-        state.handleClick()
-    }
-}
-
-private fun Modifier.handleDraggable(
+private fun Modifier.handleGesture(
     state: FSwitchState,
 ): Modifier = this.composed {
 
@@ -165,6 +155,12 @@ private fun Modifier.handleDraggable(
             }
         }
     }
+        .pointerInput(state) {
+            detectTapGestures {
+                logMsg { "handleClick" }
+                state.handleClick()
+            }
+        }
 }
 
 @Composable
