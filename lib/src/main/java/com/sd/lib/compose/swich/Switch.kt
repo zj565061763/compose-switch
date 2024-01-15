@@ -1,8 +1,10 @@
 package com.sd.lib.compose.swich
 
 import android.util.Log
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
@@ -10,13 +12,16 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
@@ -111,6 +116,7 @@ private fun Modifier.handleClick(
     state: FSwitchState,
 ): Modifier = this.pointerInput(state) {
     detectTapGestures {
+        logMsg { "handleClick" }
         state.handleClick()
     }
 }
@@ -118,24 +124,43 @@ private fun Modifier.handleClick(
 private fun Modifier.handleDraggable(
     state: FSwitchState,
 ): Modifier = this.composed {
+
     val velocityTracker = remember { VelocityTracker() }
+    var hasDrag by remember { mutableStateOf(false) }
+
     pointerInput(state) {
-        detectHorizontalDragGestures(
-            onDragStart = {
-                velocityTracker.resetTracking()
-            },
-            onHorizontalDrag = { change, delta ->
-                velocityTracker.addPointerInputChange(change)
-                state.handleDrag(delta)
-            },
-            onDragCancel = {
-                state.handleDragCancel()
-            },
-            onDragEnd = {
-                val velocity = velocityTracker.calculateVelocity().x
-                state.handleFling(velocity)
-            },
-        )
+
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+
+            // reset
+            hasDrag = false
+
+            val horizontalDrag = horizontalDrag(down.id) { input ->
+                val delta = input.positionChange().x
+                if (state.handleDrag(delta)) {
+                    if (!hasDrag) {
+                        hasDrag = true
+                        logMsg { "onDragStart" }
+                    }
+                }
+                if (hasDrag) {
+                    velocityTracker.addPointerInputChange(input)
+                    input.consume()
+                }
+            }
+
+            if (hasDrag) {
+                if (horizontalDrag) {
+                    val velocity = velocityTracker.calculateVelocity().x
+                    logMsg { "onDragEnd velocity:$velocity" }
+                    state.handleFling(velocity)
+                } else {
+                    logMsg { "onDragCancel" }
+                    state.handleDragCancel()
+                }
+            }
+        }
     }
 }
 
