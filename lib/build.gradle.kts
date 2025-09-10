@@ -1,57 +1,48 @@
-plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    `maven-publish`
-}
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 
-val libGroupId = "com.sd.lib.android"
-val libArtifactId = "compose-switch"
-val libVersion = "1.2.2"
+plugins {
+  alias(libs.plugins.android.library)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.mavenPublish)
+}
 
 android {
-    namespace = "com.sd.lib.compose.swich"
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    defaultConfig {
-        minSdk = 21
-    }
+  namespace = "com.sd.lib.compose.swich"
+  compileSdk = libs.versions.androidCompileSdk.get().toInt()
+  defaultConfig {
+    minSdk = 21
+  }
 
-    kotlinOptions {
-        freeCompilerArgs += "-module-name=$libGroupId.$libArtifactId"
-    }
+  compileOptions {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+  }
 
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
 
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
-}
+  buildFeatures {
+    compose = true
+  }
 
-kotlin {
-    jvmToolchain(8)
+  composeOptions {
+    kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+  }
 }
 
 dependencies {
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
+  val composeBom = platform(libs.androidx.compose.bom)
+  implementation(composeBom)
+  implementation(libs.androidx.compose.material3)
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            groupId = libGroupId
-            artifactId = libArtifactId
-            version = libVersion
-
-            afterEvaluate {
-                from(components["release"])
-            }
-        }
-    }
+mavenPublishing {
+  configure(
+    AndroidSingleVariantLibrary(
+      variant = "release",
+      sourcesJar = true,
+      publishJavadocJar = true,
+    )
+  )
 }

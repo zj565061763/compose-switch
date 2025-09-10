@@ -1,4 +1,10 @@
-[![](https://jitpack.io/v/zj565061763/compose-switch.svg)](https://jitpack.io/#zj565061763/compose-switch)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.zj565061763.android/compose-switch)](https://central.sonatype.com/search?q=g:io.github.zj565061763.android+compose-switch)
+
+# Gradle
+
+```kotlin
+implementation("io.github.zj565061763.android:compose-switch:$version")
+```
 
 # Demo
 
