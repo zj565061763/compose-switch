@@ -1,11 +1,10 @@
-package com.sd.lib.compose.switch
+package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -22,6 +21,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -40,6 +40,7 @@ fun FSwitch(
   thumb: @Composable () -> Unit = { DefaultSwitchThumb() },
   enabled: Boolean = true,
 ) {
+  val density = LocalDensity.current
   val boxSizeState = remember { mutableStateOf(IntSize.Zero) }
   val thumbSizeState = remember { mutableStateOf(IntSize.Zero) }
 
@@ -48,7 +49,7 @@ fun FSwitch(
     thumbSize = thumbSizeState.value.width,
   )
 
-  BoxWithConstraints(
+  Box(
     modifier = modifier
       .let { if (enabled) it.handleGesture(state) else it }
       .defaultMinSize(minWidth = 48.dp, minHeight = 24.dp)
@@ -69,7 +70,7 @@ fun FSwitch(
     // Thumb
     Box(
       modifier = Modifier
-        .height(maxHeight)
+        .height(with(density) { boxSizeState.value.height.toDp() })
         .graphicsLayer { this.alpha = if (state.hasInitialized) 1f else 0f }
         .onSizeChanged { thumbSizeState.value = it }
         .offset { IntOffset(state.thumbOffset, 0) },
@@ -91,6 +92,7 @@ private fun Modifier.handleGesture(state: FSwitchState): Modifier = composed {
       var hasDrag = false
       velocityTracker.resetTracking()
 
+      // finishOrCancel，true表示正常结束，false表示取消
       val finishOrCancel = horizontalDrag(down.id) { input ->
         val delta = input.positionChange().x
         if (state.handleDrag(delta)) {
