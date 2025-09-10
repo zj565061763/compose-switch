@@ -11,9 +11,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
@@ -43,7 +41,6 @@ class FSwitchState internal constructor() {
 
   internal val checked: Boolean get() = _checked
 
-  private lateinit var _coroutineScope: CoroutineScope
   internal lateinit var onCheckedChange: (Boolean) -> Unit
 
   private var _checked: Boolean by mutableStateOf(false)
@@ -65,7 +62,6 @@ class FSwitchState internal constructor() {
 
   @Composable
   internal fun Checked(checked: Boolean) {
-    _coroutineScope = rememberCoroutineScope()
     _checked = checked
     LaunchedEffect(checked, _uncheckedOffset, _checkedOffset) {
       if (!hasInitialized) {
