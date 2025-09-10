@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalInspectionMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -66,6 +67,13 @@ class FSwitchState internal constructor() {
   internal fun Checked(checked: Boolean) {
     _coroutineScope = rememberCoroutineScope()
     _checked = checked
+
+    if (LocalInspectionMode.current) {
+      updateOffsetByState()
+      hasInitialized = true
+      return
+    }
+
     LaunchedEffect(checked, _uncheckedOffset, _checkedOffset) {
       if (!hasInitialized) {
         if (_uncheckedOffset != _checkedOffset) {
