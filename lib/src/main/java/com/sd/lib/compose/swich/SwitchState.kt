@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 
@@ -135,7 +136,7 @@ class FSwitchState internal constructor() {
     initialVelocity: Float? = null,
     onFinish: (suspend () -> Unit)? = null,
   ) {
-    _animJob?.cancel()
+    _animJob?.cancelAndJoin()
     _animJob = currentCoroutineContext()[Job]
 
     _animOffset.snapTo(_internalOffset)
