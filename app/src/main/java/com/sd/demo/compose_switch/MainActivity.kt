@@ -30,8 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_switch.ui.theme.AppTheme
-import com.sd.lib.compose.swich.DefaultSwitchBackground
-import com.sd.lib.compose.swich.DefaultSwitchThumb
+import com.sd.lib.compose.swich.SwitchDefaultBackground
+import com.sd.lib.compose.swich.SwitchDefaultThumb
 import com.sd.lib.compose.swich.FSwitch
 import com.sd.lib.compose.swich.rememberSwitchState
 
@@ -82,14 +82,14 @@ private fun SampleCustom1() {
   FSwitch(
     state = state,
     background = {
-      DefaultSwitchBackground(
+      SwitchDefaultBackground(
         progress = state.progress,
         colorChecked = Color.Red,
         shape = RoundedCornerShape(5.dp),
       )
     },
     thumb = {
-      DefaultSwitchThumb(shape = RoundedCornerShape(5.dp))
+      SwitchDefaultThumb(shape = RoundedCornerShape(5.dp))
     },
   )
 }
@@ -102,7 +102,7 @@ private fun SampleCustom2() {
   FSwitch(
     state = state,
     background = {
-      DefaultSwitchBackground(
+      SwitchDefaultBackground(
         modifier = Modifier.fillMaxHeight(state.progress.coerceAtLeast(0.2f)),
         progress = state.progress,
         shape = RoundedCornerShape(5.dp)

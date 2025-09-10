@@ -35,8 +35,8 @@ import kotlinx.coroutines.launch
 fun FSwitch(
   modifier: Modifier = Modifier,
   state: FSwitchState,
-  background: @Composable () -> Unit = { DefaultSwitchBackground(progress = state.progress) },
-  thumb: @Composable () -> Unit = { DefaultSwitchThumb() },
+  background: @Composable () -> Unit = { SwitchDefaultBackground(progress = state.progress) },
+  thumb: @Composable () -> Unit = { SwitchDefaultThumb() },
   enabled: Boolean = true,
 ) {
   val density = LocalDensity.current
