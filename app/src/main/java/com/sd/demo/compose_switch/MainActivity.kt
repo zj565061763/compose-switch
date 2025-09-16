@@ -30,9 +30,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_switch.ui.theme.AppTheme
+import com.sd.lib.compose.swich.FSwitch
 import com.sd.lib.compose.swich.SwitchDefaultBackground
 import com.sd.lib.compose.swich.SwitchDefaultThumb
-import com.sd.lib.compose.swich.FSwitch
 import com.sd.lib.compose.swich.rememberSwitchState
 
 class MainActivity : ComponentActivity() {

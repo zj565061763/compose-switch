@@ -1,7 +1,7 @@
 package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,12 +35,23 @@ fun FSwitch(
   background: @Composable () -> Unit = { SwitchDefaultBackground(progress = state.progress) },
   thumb: @Composable () -> Unit = { SwitchDefaultThumb() },
   enabled: Boolean = true,
+  draggable: Boolean = true,
 ) {
   val density = LocalDensity.current
   val inspectionMode = LocalInspectionMode.current
+
   BoxWithConstraints(
     modifier = modifier
-      .let { if (enabled) it.handleGesture(state) else it }
+      .let { if (enabled && draggable) it.handleDragGesture(state) else it }
+      .let {
+        if (enabled) {
+          it.clickable(
+            interactionSource = null,
+            indication = null,
+            onClick = { state.handleClick() },
+          )
+        } else it
+      }
       .defaultMinSize(minWidth = 48.dp, minHeight = 24.dp)
       .semantics {
         this.role = Role.Switch
@@ -77,11 +88,11 @@ fun FSwitch(
   }
 }
 
-private fun Modifier.handleGesture(state: FSwitchState): Modifier = composed {
+private fun Modifier.handleDragGesture(state: FSwitchState): Modifier = composed {
   val coroutineScope = rememberCoroutineScope()
   val velocityTracker = remember { VelocityTracker() }
   pointerInput(state) {
-    detectHorizontalDragGestures(
+    detectDragGestures(
       onDragStart = {
         velocityTracker.resetTracking()
       },
@@ -93,12 +104,8 @@ private fun Modifier.handleGesture(state: FSwitchState): Modifier = composed {
         state.handleDragCancel()
       },
     ) { change, dragAmount ->
-      state.handleDrag(dragAmount)
+      state.handleDrag(dragAmount.x)
       velocityTracker.addPointerInputChange(change)
     }
-  }.clickable(
-    interactionSource = null,
-    indication = null,
-    onClick = { state.handleClick() },
-  )
+  }
 }
