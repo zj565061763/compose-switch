@@ -1,7 +1,10 @@
 package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
@@ -15,15 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.toggleableState
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -42,20 +42,21 @@ fun FSwitch(
 
   BoxWithConstraints(
     modifier = modifier
-      .let { if (enabled && draggable) it.handleDragGesture(state) else it }
+      .defaultMinSize(minWidth = 48.dp, minHeight = 24.dp)
       .let {
         if (enabled) {
           it.clickable(
             interactionSource = null,
             indication = null,
+            role = Role.Switch,
             onClick = { state.handleClick() },
           )
         } else it
       }
-      .defaultMinSize(minWidth = 48.dp, minHeight = 24.dp)
-      .semantics {
-        this.role = Role.Switch
-        this.toggleableState = ToggleableState(state.checked)
+      .let {
+        if (enabled && draggable) {
+          it.handleDragGesture(state)
+        } else it
       },
   ) {
     state.setSize(
@@ -92,20 +93,30 @@ private fun Modifier.handleDragGesture(state: FSwitchState): Modifier = composed
   val coroutineScope = rememberCoroutineScope()
   val velocityTracker = remember { VelocityTracker() }
   pointerInput(state) {
-    detectDragGestures(
-      onDragStart = {
-        velocityTracker.resetTracking()
-      },
-      onDragEnd = {
+    awaitEachGesture {
+      val down = awaitFirstDown()
+
+      val touchSlopChange = awaitTouchSlopOrCancellation(down.id) { change, _ -> change.consume() }
+      if (touchSlopChange == null) return@awaitEachGesture
+
+      (touchSlopChange.position - down.position).also { initialDistance ->
+        state.handleDrag(initialDistance.x)
+      }
+
+      val finish = drag(touchSlopChange.id) { change ->
+        val dragAmount = change.positionChange()
+        if (state.handleDrag(dragAmount.x)) {
+          change.consume()
+          velocityTracker.addPointerInputChange(change)
+        }
+      }
+
+      if (finish) {
         val velocity = velocityTracker.calculateVelocity().x
         coroutineScope.launch { state.handleFling(velocity) }
-      },
-      onDragCancel = {
+      } else {
         state.handleDragCancel()
-      },
-    ) { change, dragAmount ->
-      state.handleDrag(dragAmount.x)
-      velocityTracker.addPointerInputChange(change)
+      }
     }
   }
 }
