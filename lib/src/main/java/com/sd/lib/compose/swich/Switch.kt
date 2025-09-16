@@ -1,9 +1,7 @@
 package com.sd.lib.compose.swich
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.horizontalDrag
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.defaultMinSize
@@ -17,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.platform.LocalDensity
@@ -83,34 +80,21 @@ fun FSwitch(
 private fun Modifier.handleGesture(state: FSwitchState): Modifier = composed {
   val coroutineScope = rememberCoroutineScope()
   val velocityTracker = remember { VelocityTracker() }
-
   pointerInput(state) {
-    awaitEachGesture {
-      val down = awaitFirstDown(requireUnconsumed = false)
-
-      var hasDrag = false
-      velocityTracker.resetTracking()
-
-      // finishOrCancel，true表示正常结束，false表示取消
-      val finishOrCancel = horizontalDrag(down.id) { input ->
-        val delta = input.positionChange().x
-        if (state.handleDrag(delta)) {
-          if (!hasDrag) hasDrag = true
-        }
-        if (hasDrag) {
-          velocityTracker.addPointerInputChange(input)
-          input.consume()
-        }
-      }
-
-      if (hasDrag) {
-        if (finishOrCancel) {
-          val velocity = velocityTracker.calculateVelocity().x
-          coroutineScope.launch { state.handleFling(velocity) }
-        } else {
-          state.handleDragCancel()
-        }
-      }
+    detectHorizontalDragGestures(
+      onDragStart = {
+        velocityTracker.resetTracking()
+      },
+      onDragEnd = {
+        val velocity = velocityTracker.calculateVelocity().x
+        coroutineScope.launch { state.handleFling(velocity) }
+      },
+      onDragCancel = {
+        state.handleDragCancel()
+      },
+    ) { change, dragAmount ->
+      state.handleDrag(dragAmount)
+      velocityTracker.addPointerInputChange(change)
     }
   }.clickable(
     interactionSource = null,
